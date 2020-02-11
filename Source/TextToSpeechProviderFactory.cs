@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Common.Logging;
 using Innoactive.Hub.Unity;
 using Innoactive.Hub.Training.TextToSpeech;
-using LogManager = Innoactive.Hub.Logging.LogManager;
+using UnityEngine;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -16,8 +15,6 @@ namespace Innoactive.Hub.TextToSpeech
     /// </summary>
     public class TextToSpeechProviderFactory : Singleton<TextToSpeechProviderFactory>
     {
-        private static readonly ILog logger = LogManager.GetLogger<WebTextToSpeechProvider>();
-
         public interface ITextToSpeechCreator
         {
             ITextToSpeechProvider Create(TextToSpeechConfiguration configuration);
@@ -82,7 +79,7 @@ namespace Innoactive.Hub.TextToSpeech
             
             if (configuration.UseStreamingAssetFolder)
             {
-                logger.Info("Use streaming assets is set true, adding FileTextToSpeechProvider");
+                Debug.Log("Use streaming assets is set true, adding FileTextToSpeechProvider");
                 provider = new FileTextToSpeechProvider(provider, configuration);
             }
             

@@ -11,8 +11,6 @@ namespace Innoactive.Hub.Training.Audio
     [DataContract(IsReference = true)]
     public class TextToSpeechAudio : IAudioData
     {
-        private static readonly Common.Logging.ILog logger = Logging.LogManager.GetLogger<TextToSpeechAudio>();
-
         private LocalizedString text;
 
         [DataMember]
@@ -60,7 +58,7 @@ namespace Innoactive.Hub.Training.Audio
 
             if (Text == null || string.IsNullOrEmpty(Text.Value))
             {
-                logger.Warn("No text provided.");
+                Debug.LogWarning("No text provided.");
                 return;
             }
 
@@ -80,12 +78,12 @@ namespace Innoactive.Hub.Training.Audio
                 }
                 
                 provider.ConvertTextToSpeech(Text.Value)
-                    .OnFinished((clip) => { AudioClip = clip; })
+                    .OnFinished(clip => AudioClip = clip)
                     .Execute();
             }
             catch(Exception exception)
             {
-                logger.Warn(exception.Message);
+                Debug.LogWarning(exception.Message);
             }
         }
     }

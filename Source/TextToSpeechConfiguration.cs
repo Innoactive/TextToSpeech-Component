@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -6,7 +7,7 @@ using Innoactive.Hub.Training.Configuration;
 
 namespace Innoactive.Hub.TextToSpeech
 {
-    [CreateAssetMenu(fileName = "TextToSpeechConfiguration", menuName = "Innoactive/TextToSpeech", order = 1)]
+    [CreateAssetMenu(fileName = "TextToSpeechConfiguration", menuName = "Innoactive/TextToSpeech Configuration", order = 1)]
     public class TextToSpeechConfiguration : ScriptableObject
     {
         /// <summary>
@@ -58,7 +59,6 @@ namespace Innoactive.Hub.TextToSpeech
         /// Loads an existing <see cref="TextToSpeechConfiguration"/>. If the <see cref="TextToSpeechConfiguration"/> does not exist in the project
         /// it creates and saves a new instance with default values.
         /// </summary>
-        /// <remarks>New instances are not saved when they are created during runtime.</remarks>
         public static TextToSpeechConfiguration LoadConfiguration()
         {
             string filter = string.Format("t:{0}", typeof(TextToSpeechConfiguration).Name);
@@ -69,30 +69,48 @@ namespace Innoactive.Hub.TextToSpeech
                 string configFileGuid = configsGUIDs.First();
                 string configFilePath = AssetDatabase.GUIDToAssetPath(configFileGuid);
                 
-                return Resources.Load<TextToSpeechConfiguration>(configFilePath);
+                return AssetDatabase.LoadAssetAtPath<TextToSpeechConfiguration>(configFilePath);
+            }
+
+            return CreateNewConfiguration();
+        }
+        
+        /// <summary>
+        /// Loads an existing <see cref="TextToSpeechConfiguration"/>.
+        /// </summary>
+        /// <param name="configFilePath">Path where the <see cref="TextToSpeechConfiguration"/> is located.</param>
+        public static TextToSpeechConfiguration LoadConfigurationAtPath(string configFilePath)
+        {
+            if (string.IsNullOrEmpty(configFilePath))
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (File.Exists(configFilePath) == false)
+            {
+                throw new FileNotFoundException(configFilePath);
             }
             
+            return AssetDatabase.LoadAssetAtPath<TextToSpeechConfiguration>(configFilePath);
+        }
+
+        private static TextToSpeechConfiguration CreateNewConfiguration()
+        {
             TextToSpeechConfiguration textToSpeechConfiguration = CreateInstance<TextToSpeechConfiguration>();
 
-            if (Application.isPlaying)
+            RuntimeConfigurator.Configuration.SetTextToSpeechConfiguration(textToSpeechConfiguration);
+            
+            string resourcesPath = "Assets/Resources/";
+            string configFilePath = string.Format("{0}{1}.asset", resourcesPath, typeof(TextToSpeechConfiguration).Name);
+            
+            if (Directory.Exists(resourcesPath) == false)
             {
-                RuntimeConfigurator.Configuration.SetTextToSpeechConfiguration(textToSpeechConfiguration);
-                Debug.LogWarning("No text to speech configuration found!\nTo create a new configuration go to Assets > Create > Innoactive > TextToSpeech.");
+                Directory.CreateDirectory(resourcesPath);
             }
-            else
-            {
-                string resourcesPath = "Assets/Resources/";
-                string configFilePath = string.Format("{0}{1}.asset", resourcesPath, typeof(TextToSpeechConfiguration).Name);
-                
-                if (Directory.Exists(resourcesPath) == false)
-                {
-                    Directory.CreateDirectory(resourcesPath);
-                }
-                
-                AssetDatabase.CreateAsset(textToSpeechConfiguration, configFilePath);
-                AssetDatabase.SaveAssets();
-                AssetDatabase.Refresh();
-            }
+            
+            Debug.LogWarningFormat("No text to speech configuration found!\nA new configuration file was created at {0}", configFilePath);
+            AssetDatabase.CreateAsset(textToSpeechConfiguration, configFilePath);
+            AssetDatabase.Refresh();
             
             return textToSpeechConfiguration;
         }
