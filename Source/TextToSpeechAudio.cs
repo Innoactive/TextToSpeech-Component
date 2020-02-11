@@ -4,6 +4,7 @@ using Innoactive.Hub.Training.Attributes;
 using Innoactive.Hub.Training.Configuration;
 using Newtonsoft.Json;
 using UnityEngine;
+using System;
 
 namespace Innoactive.Hub.Training.Audio
 {
@@ -66,22 +67,25 @@ namespace Innoactive.Hub.Training.Audio
             try
             {
                 ITextToSpeechProvider provider;
-                if (RuntimeConfigurator.Configuration.TextToSpeechConfig == null)
+
+                TextToSpeechConfiguration ttsConfiguration = RuntimeConfigurator.Configuration.GetTextToSpeechConfiguration();
+                
+                if (ttsConfiguration == null)
                 {
                     provider = TextToSpeechProviderFactory.Instance.CreateProvider();
                 }
                 else
                 {
-                    provider = TextToSpeechProviderFactory.Instance.CreateProvider(RuntimeConfigurator.Configuration.TextToSpeechConfig);
+                    provider = TextToSpeechProviderFactory.Instance.CreateProvider(ttsConfiguration);
                 }
-
+                
                 provider.ConvertTextToSpeech(Text.Value)
                     .OnFinished((clip) => { AudioClip = clip; })
                     .Execute();
             }
-            catch (TextToSpeechProviderFactory.NoConfigurationFoundException)
+            catch(Exception exception)
             {
-                logger.Warn("No text to speech configuration found!");
+                logger.Warn(exception.Message);
             }
         }
     }

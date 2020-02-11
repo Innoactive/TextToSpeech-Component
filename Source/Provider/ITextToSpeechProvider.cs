@@ -11,7 +11,7 @@ namespace Innoactive.Hub.TextToSpeech
         /// <summary>
         /// Used for setting the config file.
         /// </summary>
-        void SetConfig(TextToSpeechConfig config);
+        void SetConfig(TextToSpeechConfiguration configuration);
 
         /// <summary>
         /// Loads the AudioClip file for the given text async.

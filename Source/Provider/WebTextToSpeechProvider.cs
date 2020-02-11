@@ -13,7 +13,7 @@ namespace Innoactive.Hub.TextToSpeech
     {
         private static readonly ILog logger = LogManager.GetLogger<WebTextToSpeechProvider>();
 
-        protected TextToSpeechConfig Config;
+        protected TextToSpeechConfiguration Configuration;
 
         protected readonly IHttpProvider HttpProvider;
 
@@ -31,9 +31,9 @@ namespace Innoactive.Hub.TextToSpeech
 
         #region Public Interface
         /// <inheritdoc/>
-        public void SetConfig(TextToSpeechConfig config)
+        public void SetConfig(TextToSpeechConfiguration configuration)
         {
-            Config = config;
+            Configuration = configuration;
         }
 
         /// <inheritdoc/>

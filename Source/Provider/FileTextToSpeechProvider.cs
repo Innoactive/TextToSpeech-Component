@@ -9,7 +9,6 @@ using UnityEngine.Networking;
 
 namespace Innoactive.Hub.TextToSpeech
 {
-    
     /// <summary>
     /// The disk based provider for text to speech, which is using the streaming assets folder.
     /// On the first step we check if the application has files provided on delivery.
@@ -24,17 +23,17 @@ namespace Innoactive.Hub.TextToSpeech
 
         protected readonly IAudioConverter AudioConverter = new NAudioConverter();
 
-        protected TextToSpeechConfig Config;
+        protected TextToSpeechConfiguration Configuration;
 
-        public FileTextToSpeechProvider(ITextToSpeechProvider fallbackProvider, TextToSpeechConfig config)
+        public FileTextToSpeechProvider(ITextToSpeechProvider fallbackProvider, TextToSpeechConfiguration configuration)
         {
-            Config = config;
+            Configuration = configuration;
             FallbackProvider = fallbackProvider;
         }
 
-        public FileTextToSpeechProvider(ITextToSpeechProvider fallbackProvider, IAudioConverter audioConverter, TextToSpeechConfig config)
+        public FileTextToSpeechProvider(ITextToSpeechProvider fallbackProvider, IAudioConverter audioConverter, TextToSpeechConfiguration configuration)
         {
-            Config = config;
+            Configuration = configuration;
             AudioConverter = audioConverter;
             FallbackProvider = fallbackProvider;
         }
@@ -44,7 +43,7 @@ namespace Innoactive.Hub.TextToSpeech
         {
             return new AsyncTask<AudioClip>(task =>
             {
-                string filename = Config.GetUniqueTextToSpeechFilename(text);
+                string filename = Configuration.GetUniqueTextToSpeechFilename(text);
                 string path = GetPathToFile(filename);
                 if (File.Exists(path))
                 {
@@ -65,7 +64,7 @@ namespace Innoactive.Hub.TextToSpeech
                     downloadTask.OnError(task.InvokeOnError);
                     downloadTask.OnFinished(audio =>
                     {
-                        if (Config.SaveAudioFilesToStreamingAssets)
+                        if (Configuration.SaveAudioFilesToStreamingAssets)
                         {
                             // Ensure target directory exists.
                             string directory = Path.GetDirectoryName(path);
@@ -86,14 +85,14 @@ namespace Innoactive.Hub.TextToSpeech
         }
 
         /// <inheritdoc/>
-        public void SetConfig(TextToSpeechConfig config)
+        public void SetConfig(TextToSpeechConfiguration configuration)
         {
-            Config = config;
+            Configuration = configuration;
         }
 
         protected virtual string GetPathToFile(string filename)
         {
-            string directory = Application.dataPath + "/StreamingAssets/" + Config.StreamingAssetCacheDirectoryName;
+            string directory = Application.dataPath + "/StreamingAssets/" + Configuration.StreamingAssetCacheDirectoryName;
             return directory + "/" + filename;
         }
 

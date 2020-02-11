@@ -1,17 +1,16 @@
-using Innoactive.Hub.Config;
-using Innoactive.Hub.Unity;
 using System;
 using System.Collections.Generic;
 using Common.Logging;
+using Innoactive.Hub.Unity;
 using Innoactive.Hub.Training.TextToSpeech;
 using LogManager = Innoactive.Hub.Logging.LogManager;
 
 namespace Innoactive.Hub.TextToSpeech
 {
     /// <summary>
-    /// This factory creates and provides TextToSpeech provider.
-    /// They are chosen by name, from the beginning there are two
-    /// provider registered:
+    /// This factory creates and provides <see cref="ITextToSpeechProvider"/>s.
+    /// They are chosen by name, the following providers are registered by default:
+    /// - MicrosoftSapiTextToSpeechProvider
     /// - WatsonTextToSpeechProvider
     /// - GoogleTextToSpeechProvider
     /// </summary>
@@ -21,7 +20,7 @@ namespace Innoactive.Hub.TextToSpeech
 
         public interface ITextToSpeechCreator
         {
-            ITextToSpeechProvider Create(TextToSpeechConfig config);
+            ITextToSpeechProvider Create(TextToSpeechConfiguration configuration);
         }
 
         /// <summary>
@@ -30,10 +29,10 @@ namespace Innoactive.Hub.TextToSpeech
         /// <typeparam name="T"></typeparam>
         public class BaseCreator<T> : ITextToSpeechCreator where T : ITextToSpeechProvider, new()
         {
-            public ITextToSpeechProvider Create(TextToSpeechConfig config)
+            public ITextToSpeechProvider Create(TextToSpeechConfiguration configuration)
             {
                 T provider = new T();
-                provider.SetConfig(config);
+                provider.SetConfig(configuration);
                 return provider;
             }
         }
@@ -60,31 +59,34 @@ namespace Innoactive.Hub.TextToSpeech
         /// </summary>
         public ITextToSpeechProvider CreateProvider()
         {
-            TextToSpeechConfig config = new TextToSpeechConfig();
-            if (config.Exists() == true)
-            {
-                config = config.Load();
-                return CreateProvider(config);
-            }
-            throw new NoConfigurationFoundException("No TextToSpeechConfig found!");
+            TextToSpeechConfiguration ttsConfiguration = TextToSpeechConfiguration.LoadConfiguration();
+            return CreateProvider(ttsConfiguration);
         }
 
         /// <summary>
         /// Creates an provider with given config.
         /// </summary>
-        public ITextToSpeechProvider CreateProvider(TextToSpeechConfig config)
+        public ITextToSpeechProvider CreateProvider(TextToSpeechConfiguration configuration)
         {
-            if (registeredProvider.ContainsKey(config.Provider))
+            if (string.IsNullOrEmpty(configuration.Provider))
             {
-                ITextToSpeechProvider provider = registeredProvider[config.Provider].Create(config);
-                if (config.UseStreamingAssetFolder)
-                {
-                    logger.Info("Use streaming assets is set true, adding FileTextToSpeechProvider");
-                    provider = new FileTextToSpeechProvider(provider, config);
-                }
-                return provider;
+                throw new NoConfigurationFoundException(string.Format("There is not a valid provider set in '{0}'!", configuration.GetType().Name));
             }
-            throw new NoMatchingProviderFoundException(string.Format("No matching provider with name '{0}' found!", config.Provider));
+
+            if (!registeredProvider.ContainsKey(configuration.Provider))
+            {
+                throw new NoMatchingProviderFoundException(string.Format("No matching provider with name '{0}' found!", configuration.Provider));
+            }
+
+            ITextToSpeechProvider provider = registeredProvider[configuration.Provider].Create(configuration);
+            
+            if (configuration.UseStreamingAssetFolder)
+            {
+                logger.Info("Use streaming assets is set true, adding FileTextToSpeechProvider");
+                provider = new FileTextToSpeechProvider(provider, configuration);
+            }
+            
+            return provider;
         }
 
         public class NoMatchingProviderFoundException : Exception

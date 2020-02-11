@@ -16,13 +16,13 @@ namespace Innoactive.Hub.TextToSpeech
         protected override IHttpRequest CreateRequest(string url, string text)
         {
             IHttpRequest request = base.CreateRequest(url, text);
-            request.Headers["Authorization"] = Config.Auth;
+            request.Headers["Authorization"] = Configuration.Auth;
             return request;
         }
 
         protected override string GetAudioFileDownloadUrl(string text)
         {
-            return string.Format(URL, text, Config.Language, Config.Voice);
+            return string.Format(URL, text, Configuration.Language, Configuration.Voice);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Innoactive.Hub.Training.TextToSpeech
     {
         private static readonly ILog logger = LogManager.GetLogger<MicrosoftSapiTextToSpeechProvider>();
 
-        private TextToSpeechConfig config;
+        private TextToSpeechConfiguration configuration;
 
         /// <summary>
         /// This is the template of the Speech Synthesis Markup Language (SSML) string used to change the language and voice.
@@ -103,9 +103,9 @@ namespace Innoactive.Hub.Training.TextToSpeech
         }
 
         /// <inheritdoc />
-        public void SetConfig(TextToSpeechConfig config)
+        public void SetConfig(TextToSpeechConfiguration configuration)
         {
-            this.config = config;
+            this.configuration = configuration;
         }
 
         /// <inheritdoc />
@@ -135,17 +135,17 @@ namespace Innoactive.Hub.Training.TextToSpeech
 
             // Try to get a valid two-letter ISO language code using the provided language in the configuration.
             string twoLetterIsoCode;
-            if (config.Language.TryConvertToTwoLetterIsoCode(out twoLetterIsoCode) == false)
+            if (configuration.Language.TryConvertToTwoLetterIsoCode(out twoLetterIsoCode) == false)
             {
                 // If it fails, use English as default language.
                 twoLetterIsoCode = "en";
-                logger.Warn(string.Format("The language \"{0}\" given in the training configuration is not valid. It was changed to default: \"en\".", config.Language));
+                logger.Warn(string.Format("The language \"{0}\" given in the training configuration is not valid. It was changed to default: \"en\".", configuration.Language));
             }
 
             // Check the validity of the voice in the configuration.
             // If it is invalid, change it to neutral.
-            string genderOfVoice = config.Voice.ToLower();
-            switch (config.Voice.ToLower())
+            string genderOfVoice = configuration.Voice.ToLower();
+            switch (configuration.Voice.ToLower())
             {
                 case "female":
                     break;
@@ -194,15 +194,15 @@ namespace Innoactive.Hub.Training.TextToSpeech
         /// </summary>
         private string PrepareFilepathForText(string text)
         {
-            string filename = Guid.NewGuid() + config.GetUniqueTextToSpeechFilename(text);
-            string directory = Path.Combine(Application.temporaryCachePath.Replace('/', Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, config.StreamingAssetCacheDirectoryName);
+            string filename = Guid.NewGuid() + configuration.GetUniqueTextToSpeechFilename(text);
+            string directory = Path.Combine(Application.temporaryCachePath.Replace('/', Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, configuration.StreamingAssetCacheDirectoryName);
             Directory.CreateDirectory(directory);
             return Path.Combine(directory, filename);
         }
 
-        public static TextToSpeechConfig CreateConfig(string voice, string iso)
+        public static TextToSpeechConfiguration CreateConfig(string voice, string iso)
         {
-            return new TextToSpeechConfig();
+            return new TextToSpeechConfiguration();
         }
     }
 }

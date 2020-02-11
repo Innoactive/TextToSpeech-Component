@@ -18,7 +18,7 @@ namespace Innoactive.Hub.TextToSpeech
 
         protected override string GetAudioFileDownloadUrl(string text)
         {
-            return string.Format(URL, text, Config.Language, Config.Voice);
+            return string.Format(URL, text, Configuration.Language, Configuration.Voice);
         }
     }
 }
