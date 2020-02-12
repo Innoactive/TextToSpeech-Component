@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using Innoactive.Hub.Unity;
 using Innoactive.Hub.Training.TextToSpeech;
-using UnityEngine;
 
 namespace Innoactive.Hub.TextToSpeech
 {

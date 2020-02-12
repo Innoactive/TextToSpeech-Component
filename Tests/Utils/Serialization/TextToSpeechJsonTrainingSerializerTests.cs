@@ -1,14 +1,14 @@
 ﻿#if UNITY_EDITOR
-using System.Collections;
 using System.Linq;
-using Innoactive.Hub.Training.Audio;
+using System.Collections;
 using Innoactive.Hub.Training;
+using Innoactive.Hub.Training.Audio;
 using Innoactive.Hub.Training.Behaviors;
 using Innoactive.Hub.Training.Utils.Builders;
-using Innoactive.Hub.Training.Utils.Serialization;
 using Innoactive.Hub.Unity.Tests.Training.Utils;
-using UnityEngine.Assertions;
+using Innoactive.Hub.Training.Utils.Serialization;
 using UnityEngine.TestTools;
+using UnityEngine.Assertions;
 
 namespace Innoactive.Hub.Unity.Tests.Training
 {

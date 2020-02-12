@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
-using Innoactive.Hub.Training.Audio;
 using UnityEngine;
+using Innoactive.Hub.Training.Audio;
 
 namespace Innoactive.Hub.Training.Editors.Drawers
 {

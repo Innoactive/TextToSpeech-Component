@@ -1,15 +1,13 @@
 using System;
-using System.Collections;
 using System.IO;
 using System.Threading;
-using Common.Logging;
+using System.Collections;
 using Innoactive.Hub.SDK;
-using Innoactive.Hub.TextToSpeech;
 using Innoactive.Hub.Threading;
+using Innoactive.Hub.TextToSpeech;
 using Innoactive.Hub.Training.Utils;
-using UnityEngine;
 using SpeechLib;
-using LogManager = Innoactive.Hub.Logging.LogManager;
+using UnityEngine;
 using ThreadPriority = System.Threading.ThreadPriority;
 
 namespace Innoactive.Hub.Training.TextToSpeech
@@ -22,8 +20,6 @@ namespace Innoactive.Hub.Training.TextToSpeech
     /// </summary>
     public class MicrosoftSapiTextToSpeechProvider : ITextToSpeechProvider
     {
-        private static readonly ILog logger = LogManager.GetLogger<MicrosoftSapiTextToSpeechProvider>();
-
         private TextToSpeechConfiguration configuration;
 
         /// <summary>
@@ -139,7 +135,7 @@ namespace Innoactive.Hub.Training.TextToSpeech
             {
                 // If it fails, use English as default language.
                 twoLetterIsoCode = "en";
-                logger.Warn(string.Format("The language \"{0}\" given in the training configuration is not valid. It was changed to default: \"en\".", configuration.Language));
+                Debug.LogWarningFormat(string.Format("The language \"{0}\" given in the training configuration is not valid. It was changed to default: \"en\".", configuration.Language));
             }
 
             // Check the validity of the voice in the configuration.

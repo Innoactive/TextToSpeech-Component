@@ -1,11 +1,10 @@
-﻿using UnityEngine;
-using Innoactive.Hub.SDK;
-using System;
+﻿using System;
 using System.IO;
 using System.Collections;
-using Common.Logging;
-using Innoactive.Hub.Threading;
+using UnityEngine;
 using UnityEngine.Networking;
+using Innoactive.Hub.SDK;
+using Innoactive.Hub.Threading;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -17,8 +16,6 @@ namespace Innoactive.Hub.TextToSpeech
     /// </summary>
     public class FileTextToSpeechProvider : ITextToSpeechProvider
     {
-        private static readonly ILog logger = Logging.LogManager.GetLogger<FileTextToSpeechProvider>();
-
         protected readonly ITextToSpeechProvider FallbackProvider;
 
         protected readonly IAudioConverter AudioConverter = new NAudioConverter();
@@ -98,11 +95,7 @@ namespace Innoactive.Hub.TextToSpeech
 
         private IEnumerator LoadAudioFromFile(string path, IAsyncTask<AudioClip> task)
         {
-#if UNITY_2017_3_OR_NEWER
             string url = UnityWebRequest.EscapeURL(path);
-#else
-            string url = WWW.EscapeURL(path);
-#endif
 
             url = "file:///" + url;
 
@@ -115,7 +108,7 @@ namespace Innoactive.Hub.TextToSpeech
                 AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
                 if (clip == null)
                 {
-                    logger.ErrorFormat("Could not load AudioClip '{0}' - AudioClip is null.", path);
+                    Debug.LogErrorFormat("Could not load AudioClip '{0}' - AudioClip is null.", path);
                     task.InvokeOnError(new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!"));
                 }
                 else
@@ -125,7 +118,7 @@ namespace Innoactive.Hub.TextToSpeech
             }
             else
             {
-                logger.ErrorFormat("Could not load AudioClip '{0}': {1}", path, request.error);
+                Debug.LogErrorFormat("Could not load AudioClip '{0}': {1}", path, request.error);
                 task.InvokeOnError(new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!"));
             }
         }

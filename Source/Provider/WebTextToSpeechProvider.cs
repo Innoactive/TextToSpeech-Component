@@ -1,8 +1,7 @@
-using Common.Logging;
-using Innoactive.Hub.SDK;
 using System;
 using UnityEngine;
 using UnityEngine.Networking;
+using Innoactive.Hub.SDK;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -11,8 +10,6 @@ namespace Innoactive.Hub.TextToSpeech
     /// </summary>
     public abstract class WebTextToSpeechProvider : ITextToSpeechProvider
     {
-        private static readonly ILog logger = LogManager.GetLogger<WebTextToSpeechProvider>();
-
         protected TextToSpeechConfiguration Configuration;
 
         protected readonly IHttpProvider HttpProvider;
@@ -70,7 +67,7 @@ namespace Innoactive.Hub.TextToSpeech
                 if (result.StatusCode != 200 || data.Length == 0)
                 {
                     string errorMsg = string.Format("Error while fetching audio from '{0}' backend, code: '{1}'", request.Url.ToString(), result.StatusCode);
-                    logger.Error(errorMsg);
+                    Debug.LogError(errorMsg);
                     task.InvokeOnError(new DownloadFailedException(errorMsg));
                 }
                 else
@@ -88,16 +85,12 @@ namespace Innoactive.Hub.TextToSpeech
         /// </summary>
         protected virtual IHttpRequest CreateRequest(string url, string text)
         {
-#if UNITY_2017_3_OR_NEWER
             string escapedText = UnityWebRequest.EscapeURL(text);
-#else
-            string escapedText = WWW.EscapeURL(text);
-#endif
             return new HttpRequest(new Uri(string.Format(url, escapedText)));
         }
 
         /// <summary>
-        /// This method converts an mp3 file from byte to an Audioclip. If you have a different format, override this method.
+        /// This method converts an mp3 file from byte to an AudioClip. If you have a different format, override this method.
         /// </summary>
         protected virtual AudioClip CreateAudioClip(byte[] data)
         {

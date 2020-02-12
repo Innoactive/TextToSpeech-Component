@@ -1,6 +1,6 @@
 ﻿using System;
-using NAudio.Wave;
 using System.IO;
+using NAudio.Wave;
 using UnityEngine;
 
 namespace Innoactive.Hub.TextToSpeech
@@ -10,8 +10,6 @@ namespace Innoactive.Hub.TextToSpeech
     /// </summary>
     public class NAudioConverter : IAudioConverter
     {
-        private static readonly Common.Logging.ILog logger = Logging.LogManager.GetLogger<NAudioConverter>();
-
         /// <summary>
         /// This method uses NAudio to convert a mp3 file given as byte array to an AudioClip in .wav format.
         /// </summary>
@@ -61,11 +59,11 @@ namespace Innoactive.Hub.TextToSpeech
             }
             catch (UnauthorizedAccessException ex)
             {
-                logger.Error("Could not write to disk, not authorized", ex);
+                Debug.LogErrorFormat("Could not write to disk, not authorized\n{0}", ex.Message);
             }
             catch (Exception ex)
             {
-                logger.ErrorFormat("Unknown exception occurred: '{0}'", ex, ex.Message);
+                Debug.LogErrorFormat("Unknown exception occurred: '{0}'", ex.Message);
             }
 
             return false;

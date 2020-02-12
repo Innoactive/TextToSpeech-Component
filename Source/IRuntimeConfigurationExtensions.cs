@@ -2,6 +2,9 @@
 
 namespace Innoactive.Hub.TextToSpeech
 {
+    /// <summary>
+    /// TextToSpeech extensions methods for <see cref="IRuntimeConfiguration"/>.
+    /// </summary>
     public static class IRuntimeConfigurationExtensions
     {
         /// <summary>

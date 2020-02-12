@@ -1,10 +1,10 @@
+using System;
+using UnityEngine;
+using Newtonsoft.Json;
 using System.Runtime.Serialization;
 using Innoactive.Hub.TextToSpeech;
 using Innoactive.Hub.Training.Attributes;
 using Innoactive.Hub.Training.Configuration;
-using Newtonsoft.Json;
-using UnityEngine;
-using System;
 
 namespace Innoactive.Hub.Training.Audio
 {

@@ -1,5 +1,4 @@
 ﻿using Innoactive.Hub.SDK;
-using System.Collections.Generic;
 
 namespace Innoactive.Hub.TextToSpeech
 {
