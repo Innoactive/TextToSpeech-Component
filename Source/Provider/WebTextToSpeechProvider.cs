@@ -92,15 +92,15 @@ namespace Innoactive.Hub.TextToSpeech
         }
 
         /// <summary>
-        /// Method to create the UnityWebRequest needed to get the file. If you have to add specific authorization or other
-        /// header you can do it here.
+        /// Method to create the UnityWebRequest needed to get the file.
+        /// If you have to add specific authorization or other header you can do it here.
         /// </summary>
-        protected virtual UnityWebRequest CreateRequest(string url, string text)
+        protected virtual UnityWebRequest CreateRequest(string url, string text, AudioType format = AudioType.MPEG)
         {
             string escapedText = UnityWebRequest.EscapeURL(text);
             Uri uri = new Uri(string.Format(url, escapedText));
             
-            return UnityWebRequestMultimedia.GetAudioClip(uri, AudioType.UNKNOWN);
+            return UnityWebRequestMultimedia.GetAudioClip(uri, format);
         }
 
         /// <summary>
