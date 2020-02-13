@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 using Innoactive.Hub.SDK;
+using Innoactive.Hub.Threading;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -12,17 +14,17 @@ namespace Innoactive.Hub.TextToSpeech
     {
         protected TextToSpeechConfiguration Configuration;
 
-        protected readonly IHttpProvider HttpProvider;
+        protected readonly UnityWebRequest UnityWebRequest;
 
         protected readonly IAudioConverter AudioConverter;
 
-        protected WebTextToSpeechProvider() : this(new DotNetWebRequestHttpProvider()) { }
+        protected WebTextToSpeechProvider() : this(new UnityWebRequest()) { }
 
-        protected WebTextToSpeechProvider(IHttpProvider httpProvider) : this(httpProvider, new NAudioConverter()) { }
+        protected WebTextToSpeechProvider(UnityWebRequest unityWebRequest) : this(unityWebRequest, new NAudioConverter()) { }
 
-        protected WebTextToSpeechProvider(IHttpProvider httpProvider, IAudioConverter audioConverter)
+        protected WebTextToSpeechProvider(UnityWebRequest unityWebRequest, IAudioConverter audioConverter)
         {
-            HttpProvider = httpProvider;
+            UnityWebRequest = unityWebRequest;
             AudioConverter = audioConverter;
         }
 
@@ -38,7 +40,7 @@ namespace Innoactive.Hub.TextToSpeech
         {
             return new AsyncTask<AudioClip>((task) =>
             {
-                DownloadAudio(text, task);
+                CoroutineDispatcher.Instance.StartCoroutine(DownloadAudio(text, task));
                 return null;
             });
         }
@@ -56,37 +58,49 @@ namespace Innoactive.Hub.TextToSpeech
         /// This method should asynchronous download the audio file to an AudioClip and call task OnFinish with it.
         /// You can use the ParseAudio method to convert the file (mp3) into an AudioClip.
         /// </summary>
-        protected virtual void DownloadAudio(string text, IAsyncTask<AudioClip> task)
+        protected virtual IEnumerator DownloadAudio(string text, IAsyncTask<AudioClip> task)
         {
-            IHttpRequest request = CreateRequest(GetAudioFileDownloadUrl(text), text);
-            HttpProvider.Send<byte[]>(request)
-                .OnFinished((result) =>
-                {
-                    byte[] data = result.Data;
+            using (UnityWebRequest request = CreateRequest(GetAudioFileDownloadUrl(text), text))
+            {
+                // Request and wait for the response.
+                yield return request.SendWebRequest();
 
-                    if (result.StatusCode != 200 || data.Length == 0)
+                if (request.isNetworkError == false && request.isHttpError == false)
+                {
+                    AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+                
+                    if (clip == null)
                     {
-                        string errorMsg = $"Error while fetching audio from '{request.Url}' backend, code: '{result.StatusCode}'";
+                        string errorMsg = $"Error while retrieving audio: '{request.error}'";
+                        
                         Debug.LogError(errorMsg);
                         task.InvokeOnError(new DownloadFailedException(errorMsg));
                     }
                     else
                     {
-                        ParseAudio(data, task);
+                        task.InvokeOnFinished(clip);
                     }
-                })
-                .OnError(task.InvokeOnError)
-                .Execute();
+                }
+                else
+                {
+                    string errorMsg = $"Error while fetching audio from '{request.uri}' backend, error: '{request.error}'";
+                        
+                    Debug.LogError(errorMsg);
+                    task.InvokeOnError(new DownloadFailedException(errorMsg));
+                }
+            }
         }
 
         /// <summary>
-        /// Method to create the HttpRequest needed to get the file. If you have to add specific authorization or other
+        /// Method to create the UnityWebRequest needed to get the file. If you have to add specific authorization or other
         /// header you can do it here.
         /// </summary>
-        protected virtual IHttpRequest CreateRequest(string url, string text)
+        protected virtual UnityWebRequest CreateRequest(string url, string text)
         {
             string escapedText = UnityWebRequest.EscapeURL(text);
-            return new HttpRequest(new Uri(string.Format(url, escapedText)));
+            Uri uri = new Uri(string.Format(url, escapedText));
+            
+            return UnityWebRequestMultimedia.GetAudioClip(uri, AudioType.UNKNOWN);
         }
 
         /// <summary>
@@ -122,6 +136,8 @@ namespace Innoactive.Hub.TextToSpeech
         public class DownloadFailedException : Exception
         {
             public DownloadFailedException(string msg) : base(msg) { }
+            
+            public DownloadFailedException(string msg, Exception ex) : base(msg, ex) { }
         }
     }
 }
