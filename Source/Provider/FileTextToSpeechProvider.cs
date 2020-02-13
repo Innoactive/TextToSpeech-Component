@@ -42,6 +42,7 @@ namespace Innoactive.Hub.TextToSpeech
             {
                 string filename = Configuration.GetUniqueTextToSpeechFilename(text);
                 string path = GetPathToFile(filename);
+                
                 if (File.Exists(path))
                 {
                     try
@@ -65,6 +66,7 @@ namespace Innoactive.Hub.TextToSpeech
                         {
                             // Ensure target directory exists.
                             string directory = Path.GetDirectoryName(path);
+                            
                             if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
                             {
                                 Directory.CreateDirectory(directory);
@@ -89,15 +91,13 @@ namespace Innoactive.Hub.TextToSpeech
 
         protected virtual string GetPathToFile(string filename)
         {
-            string directory = Application.dataPath + "/StreamingAssets/" + Configuration.StreamingAssetCacheDirectoryName;
-            return directory + "/" + filename;
+            string directory = $"{Application.streamingAssetsPath}/{Configuration.StreamingAssetCacheDirectoryName}/{filename}";
+            return directory;
         }
 
         private IEnumerator LoadAudioFromFile(string path, IAsyncTask<AudioClip> task)
         {
-            string url = UnityWebRequest.EscapeURL(path);
-
-            url = "file:///" + url;
+            string url = $"file:///{UnityWebRequest.EscapeURL(path)}";
 
             UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.UNKNOWN);
 
@@ -106,6 +106,7 @@ namespace Innoactive.Hub.TextToSpeech
             if (request.isNetworkError == false && request.isHttpError == false)
             {
                 AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+                
                 if (clip == null)
                 {
                     Debug.LogErrorFormat("Could not load AudioClip '{0}' - AudioClip is null.", path);

@@ -59,24 +59,24 @@ namespace Innoactive.Hub.TextToSpeech
         protected virtual void DownloadAudio(string text, IAsyncTask<AudioClip> task)
         {
             IHttpRequest request = CreateRequest(GetAudioFileDownloadUrl(text), text);
-            IAsyncTask<IHttpResponse<byte[]>> webTask = HttpProvider.Send<byte[]>(request);
-            webTask.OnFinished((result) =>
-            {
-                byte[] data = result.Data;
+            HttpProvider.Send<byte[]>(request)
+                .OnFinished((result) =>
+                {
+                    byte[] data = result.Data;
 
-                if (result.StatusCode != 200 || data.Length == 0)
-                {
-                    string errorMsg = string.Format("Error while fetching audio from '{0}' backend, code: '{1}'", request.Url.ToString(), result.StatusCode);
-                    Debug.LogError(errorMsg);
-                    task.InvokeOnError(new DownloadFailedException(errorMsg));
-                }
-                else
-                {
-                    ParseAudio(data, task);
-                }
-            });
-            webTask.OnError(task.InvokeOnError);
-            webTask.Execute();
+                    if (result.StatusCode != 200 || data.Length == 0)
+                    {
+                        string errorMsg = $"Error while fetching audio from '{request.Url}' backend, code: '{result.StatusCode}'";
+                        Debug.LogError(errorMsg);
+                        task.InvokeOnError(new DownloadFailedException(errorMsg));
+                    }
+                    else
+                    {
+                        ParseAudio(data, task);
+                    }
+                })
+                .OnError(task.InvokeOnError)
+                .Execute();
         }
 
         /// <summary>
@@ -103,6 +103,7 @@ namespace Innoactive.Hub.TextToSpeech
             try
             {
                 AudioClip clip = CreateAudioClip(data);
+                
                 if (clip.loadState == AudioDataLoadState.Loaded)
                 {
                     task.InvokeOnFinished(clip);

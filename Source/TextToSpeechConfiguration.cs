@@ -61,7 +61,7 @@ namespace Innoactive.Hub.TextToSpeech
         /// </summary>
         public static TextToSpeechConfiguration LoadConfiguration()
         {
-            string filter = string.Format("t:{0}", typeof(TextToSpeechConfiguration).Name);
+            string filter = $"t:{typeof(TextToSpeechConfiguration).Name}";
             string[] configsGUIDs = AssetDatabase.FindAssets(filter);
 
             if (configsGUIDs.Any())
@@ -97,11 +97,11 @@ namespace Innoactive.Hub.TextToSpeech
         private static TextToSpeechConfiguration CreateNewConfiguration()
         {
             TextToSpeechConfiguration textToSpeechConfiguration = CreateInstance<TextToSpeechConfiguration>();
-
             RuntimeConfigurator.Configuration.SetTextToSpeechConfiguration(textToSpeechConfiguration);
             
+#if UNITY_EDITOR
             string resourcesPath = "Assets/Resources/";
-            string configFilePath = string.Format("{0}{1}.asset", resourcesPath, typeof(TextToSpeechConfiguration).Name);
+            string configFilePath = $"{resourcesPath}{typeof(TextToSpeechConfiguration).Name}.asset";
             
             if (Directory.Exists(resourcesPath) == false)
             {
@@ -111,6 +111,7 @@ namespace Innoactive.Hub.TextToSpeech
             Debug.LogWarningFormat("No text to speech configuration found!\nA new configuration file was created at {0}", configFilePath);
             AssetDatabase.CreateAsset(textToSpeechConfiguration, configFilePath);
             AssetDatabase.Refresh();
+#endif
             
             return textToSpeechConfiguration;
         }
