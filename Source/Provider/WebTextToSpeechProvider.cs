@@ -67,9 +67,9 @@ namespace Innoactive.Hub.TextToSpeech
 
                 if (request.isNetworkError == false && request.isHttpError == false)
                 {
-                    AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
-                
-                    if (clip == null)
+                    byte[] data = request.downloadHandler.data;
+
+                    if (data == null || data.Length == 0)
                     {
                         string errorMsg = $"Error while retrieving audio: '{request.error}'";
                         
@@ -78,7 +78,7 @@ namespace Innoactive.Hub.TextToSpeech
                     }
                     else
                     {
-                        task.InvokeOnFinished(clip);
+                        ParseAudio(data, task);
                     }
                 }
                 else
@@ -95,12 +95,12 @@ namespace Innoactive.Hub.TextToSpeech
         /// Method to create the UnityWebRequest needed to get the file.
         /// If you have to add specific authorization or other header you can do it here.
         /// </summary>
-        protected virtual UnityWebRequest CreateRequest(string url, string text, AudioType format = AudioType.MPEG)
+        protected virtual UnityWebRequest CreateRequest(string url, string text)
         {
             string escapedText = UnityWebRequest.EscapeURL(text);
             Uri uri = new Uri(string.Format(url, escapedText));
             
-            return UnityWebRequestMultimedia.GetAudioClip(uri, format);
+            return UnityWebRequest.Get(uri);
         }
 
         /// <summary>

@@ -14,9 +14,9 @@ namespace Innoactive.Hub.TextToSpeech
 
         public WatsonTextToSpeechProvider(UnityWebRequest unityWebRequest) : base(unityWebRequest) { }
 
-        protected override UnityWebRequest CreateRequest(string url, string text, AudioType format = AudioType.MPEG)
+        protected override UnityWebRequest CreateRequest(string url, string text)
         {
-            UnityWebRequest request = base.CreateRequest(url, text, format);
+            UnityWebRequest request = base.CreateRequest(url, text);
             request.SetRequestHeader("Authorization", Configuration.Auth);
             
             return request;
