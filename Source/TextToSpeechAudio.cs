@@ -64,18 +64,8 @@ namespace Innoactive.Hub.Training.Audio
 
             try
             {
-                ITextToSpeechProvider provider;
-
                 TextToSpeechConfiguration ttsConfiguration = RuntimeConfigurator.Configuration.GetTextToSpeechConfiguration();
-                
-                if (ttsConfiguration == null)
-                {
-                    provider = TextToSpeechProviderFactory.Instance.CreateProvider();
-                }
-                else
-                {
-                    provider = TextToSpeechProviderFactory.Instance.CreateProvider(ttsConfiguration);
-                }
+                ITextToSpeechProvider provider = TextToSpeechProviderFactory.Instance.CreateProvider(ttsConfiguration);
                 
                 provider.ConvertTextToSpeech(Text.Value)
                     .OnFinished(clip => AudioClip = clip)

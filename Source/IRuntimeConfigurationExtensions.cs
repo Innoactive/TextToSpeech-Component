@@ -18,7 +18,7 @@ namespace Innoactive.Hub.TextToSpeech
         public static TextToSpeechConfiguration GetTextToSpeechConfiguration(this IRuntimeConfiguration runtimeConfiguration)
         {
             if (textToSpeechConfiguration == null)
-            { 
+            {
                 textToSpeechConfiguration = TextToSpeechConfiguration.LoadConfiguration();
             }
             

@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Security.Cryptography;
-using Innoactive.Hub.Helper;
 
 namespace Innoactive.Hub.TextToSpeech
 {

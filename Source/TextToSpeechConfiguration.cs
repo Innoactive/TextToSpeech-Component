@@ -56,11 +56,14 @@ namespace Innoactive.Hub.TextToSpeech
         public string Auth;
 
         /// <summary>
-        /// Loads an existing <see cref="TextToSpeechConfiguration"/>. If the <see cref="TextToSpeechConfiguration"/> does not exist in the project
-        /// it creates and saves a new instance with default values.
+        /// Loads the first existing <see cref="TextToSpeechConfiguration"/> found in the project.
+        /// If any <see cref="TextToSpeechConfiguration"/> exist in the project it creates and saves a new instance with default values (editor only).
         /// </summary>
+        /// <remarks>When used in runtime, this method can only retrieve config files located under a Resources folder.</remarks>
         public static TextToSpeechConfiguration LoadConfiguration()
         {
+            return CreateNewConfiguration();
+#if UNITY_EDITOR
             string filter = $"t:{typeof(TextToSpeechConfiguration).Name}";
             string[] configsGUIDs = AssetDatabase.FindAssets(filter);
 
@@ -71,27 +74,15 @@ namespace Innoactive.Hub.TextToSpeech
                 
                 return AssetDatabase.LoadAssetAtPath<TextToSpeechConfiguration>(configFilePath);
             }
-
-            return CreateNewConfiguration();
-        }
-        
-        /// <summary>
-        /// Loads an existing <see cref="TextToSpeechConfiguration"/>.
-        /// </summary>
-        /// <param name="configFilePath">Path where the <see cref="TextToSpeechConfiguration"/> is located.</param>
-        public static TextToSpeechConfiguration LoadConfigurationAtPath(string configFilePath)
-        {
-            if (string.IsNullOrEmpty(configFilePath))
-            {
-                throw new ArgumentNullException();
-            }
-
-            if (File.Exists(configFilePath) == false)
-            {
-                throw new FileNotFoundException(configFilePath);
-            }
+#else
+            UnityEngine.Object[] configuration = Resources.FindObjectsOfTypeAll(typeof(TextToSpeechConfiguration));
             
-            return AssetDatabase.LoadAssetAtPath<TextToSpeechConfiguration>(configFilePath);
+            if (configuration.Any())
+            {
+                return configuration.First() as TextToSpeechConfiguration;
+            }
+#endif
+            return CreateNewConfiguration();
         }
 
         private static TextToSpeechConfiguration CreateNewConfiguration()
