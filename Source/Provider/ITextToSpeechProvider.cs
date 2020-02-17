@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using Innoactive.Hub.SDK;
+﻿using System;
+using UnityEngine;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -14,8 +14,8 @@ namespace Innoactive.Hub.TextToSpeech
         void SetConfig(TextToSpeechConfiguration configuration);
 
         /// <summary>
-        /// Loads the AudioClip file for the given text async.
+        /// Loads the AudioClip file for the given text.
         /// </summary>
-        IAsyncTask<AudioClip> ConvertTextToSpeech(string text);
+        void ConvertTextToSpeech(string text, Action<AudioClip> OnFinished);
     }
 }

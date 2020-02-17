@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
-using Innoactive.Hub.SDK;
 using Innoactive.Hub.Threading;
 
 namespace Innoactive.Hub.TextToSpeech
@@ -36,14 +35,11 @@ namespace Innoactive.Hub.TextToSpeech
         }
 
         /// <inheritdoc/>
-        public IAsyncTask<AudioClip> ConvertTextToSpeech(string text)
+        public void ConvertTextToSpeech(string text, Action<AudioClip> OnFinished)
         {
-            return new AsyncTask<AudioClip>((task) =>
-            {
-                CoroutineDispatcher.Instance.StartCoroutine(DownloadAudio(text, task));
-                return null;
-            });
+            CoroutineDispatcher.Instance.StartCoroutine(DownloadAudio(text, OnFinished));
         }
+
         #endregion
 
         #region Download handling
@@ -58,7 +54,7 @@ namespace Innoactive.Hub.TextToSpeech
         /// This method should asynchronous download the audio file to an AudioClip and call task OnFinish with it.
         /// You can use the ParseAudio method to convert the file (mp3) into an AudioClip.
         /// </summary>
-        protected virtual IEnumerator DownloadAudio(string text, IAsyncTask<AudioClip> task)
+        protected virtual IEnumerator DownloadAudio(string text, Action<AudioClip> OnFinished)
         {
             using (UnityWebRequest request = CreateRequest(GetAudioFileDownloadUrl(text), text))
             {
@@ -71,22 +67,16 @@ namespace Innoactive.Hub.TextToSpeech
 
                     if (data == null || data.Length == 0)
                     {
-                        string errorMsg = $"Error while retrieving audio: '{request.error}'";
-                        
-                        Debug.LogError(errorMsg);
-                        task.InvokeOnError(new DownloadFailedException(errorMsg));
+                        throw new DownloadFailedException($"Error while retrieving audio: '{request.error}'");
                     }
                     else
                     {
-                        ParseAudio(data, task);
+                        ParseAudio(data, OnFinished);
                     }
                 }
                 else
                 {
-                    string errorMsg = $"Error while fetching audio from '{request.uri}' backend, error: '{request.error}'";
-                        
-                    Debug.LogError(errorMsg);
-                    task.InvokeOnError(new DownloadFailedException(errorMsg));
+                    throw new DownloadFailedException($"Error while fetching audio from '{request.uri}' backend, error: '{request.error}'");
                 }
             }
         }
@@ -112,24 +102,17 @@ namespace Innoactive.Hub.TextToSpeech
         }
         #endregion
 
-        private void ParseAudio(byte[] data, IAsyncTask<AudioClip> task)
+        private void ParseAudio(byte[] data, Action<AudioClip> OnFinished)
         {
-            try
+            AudioClip clip = CreateAudioClip(data);
+            
+            if (clip.loadState == AudioDataLoadState.Loaded)
             {
-                AudioClip clip = CreateAudioClip(data);
-                
-                if (clip.loadState == AudioDataLoadState.Loaded)
-                {
-                    task.InvokeOnFinished(clip);
-                }
-                else
-                {
-                    task.InvokeOnError(new UnableToParseAudioFormatException("Creating AudioClip failed for text"));
-                }
+                OnFinished.Invoke(clip);
             }
-            catch (Exception ex)
+            else
             {
-                task.InvokeOnError(ex);
+                throw new UnableToParseAudioFormatException("Creating AudioClip failed for text");
             }
         }
 

@@ -3,7 +3,6 @@ using System.IO;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
-using Innoactive.Hub.SDK;
 using Innoactive.Hub.Threading;
 
 namespace Innoactive.Hub.TextToSpeech
@@ -36,51 +35,35 @@ namespace Innoactive.Hub.TextToSpeech
         }
 
         /// <inheritdoc/>
-        public IAsyncTask<AudioClip> ConvertTextToSpeech(string text)
+        public void ConvertTextToSpeech(string text, Action<AudioClip> OnFinished)
         {
-            return new AsyncTask<AudioClip>(task =>
+            string filename = Configuration.GetUniqueTextToSpeechFilename(text);
+            string path = GetPathToFile(filename);
+            
+            if (File.Exists(path))
             {
-                string filename = Configuration.GetUniqueTextToSpeechFilename(text);
-                string path = GetPathToFile(filename);
-                
-                if (File.Exists(path))
+                CoroutineDispatcher.Instance.StartCoroutine(LoadAudioFromFile(path, OnFinished));
+            }
+            else
+            {
+                FallbackProvider.ConvertTextToSpeech(text, audio =>
                 {
-                    try
+                    if (Configuration.SaveAudioFilesToStreamingAssets)
                     {
-                        CoroutineDispatcher.Instance.StartCoroutine(LoadAudioFromFile(path, task));
-                    }
-                    catch (Exception ex)
-                    {
-                        task.InvokeOnError(ex);
-                    }
-
-                    return null;
-                }
-                else
-                {
-                    IAsyncTask<AudioClip> downloadTask = FallbackProvider.ConvertTextToSpeech(text);
-                    downloadTask.OnError(task.InvokeOnError);
-                    downloadTask.OnFinished(audio =>
-                    {
-                        if (Configuration.SaveAudioFilesToStreamingAssets)
+                        // Ensure target directory exists.
+                        string directory = Path.GetDirectoryName(path);
+                        
+                        if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
                         {
-                            // Ensure target directory exists.
-                            string directory = Path.GetDirectoryName(path);
-                            
-                            if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
-                            {
-                                Directory.CreateDirectory(directory);
-                            }
-
-                            AudioConverter.TryWriteAudioClipToFile(audio, path);
+                            Directory.CreateDirectory(directory);
                         }
-
-                        task.InvokeOnFinished(audio);
-                    });
-
-                    return downloadTask.Execute();
-                }
-            });
+            
+                        AudioConverter.TryWriteAudioClipToFile(audio, path);
+                    }
+                    
+                    OnFinished.Invoke(audio);
+                });
+            }
         }
 
         /// <inheritdoc/>
@@ -95,7 +78,7 @@ namespace Innoactive.Hub.TextToSpeech
             return directory;
         }
 
-        private IEnumerator LoadAudioFromFile(string path, IAsyncTask<AudioClip> task)
+        private IEnumerator LoadAudioFromFile(string path, Action<AudioClip> OnFinished)
         {
             string url = $"file:///{UnityWebRequest.EscapeURL(path)}";
 
@@ -110,17 +93,17 @@ namespace Innoactive.Hub.TextToSpeech
                 if (clip == null)
                 {
                     Debug.LogErrorFormat("Could not load AudioClip '{0}' - AudioClip is null.", path);
-                    task.InvokeOnError(new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!"));
+                    throw new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!");
                 }
                 else
                 {
-                    task.InvokeOnFinished(clip);
+                    OnFinished.Invoke(clip);
                 }
             }
             else
             {
                 Debug.LogErrorFormat("Could not load AudioClip '{0}': {1}", path, request.error);
-                task.InvokeOnError(new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!"));
+                throw new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!");
             }
         }
 

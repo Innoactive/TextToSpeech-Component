@@ -66,12 +66,10 @@ namespace Innoactive.Hub.Training.Audio
             {
                 TextToSpeechConfiguration ttsConfiguration = RuntimeConfigurator.Configuration.GetTextToSpeechConfiguration();
                 ITextToSpeechProvider provider = TextToSpeechProviderFactory.Instance.CreateProvider(ttsConfiguration);
-                
-                provider.ConvertTextToSpeech(Text.Value)
-                    .OnFinished(clip => AudioClip = clip)
-                    .Execute();
+
+                provider.ConvertTextToSpeech(Text.Value, clip => AudioClip = clip);
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 Debug.LogWarning(exception.Message);
             }

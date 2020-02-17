@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Collections;
-using Innoactive.Hub.SDK;
 using Innoactive.Hub.Threading;
 using Innoactive.Hub.TextToSpeech;
 using Innoactive.Hub.Training.Utils;
@@ -105,19 +104,15 @@ namespace Innoactive.Hub.Training.TextToSpeech
         }
 
         /// <inheritdoc />
-        public IAsyncTask<AudioClip> ConvertTextToSpeech(string text)
+        public void ConvertTextToSpeech(string text, Action<AudioClip> OnFinished)
         {
-            return new AsyncTask<AudioClip>(task =>
-            {
-                CoroutineDispatcher.Instance.StartCoroutine(GetAudio(task, text));
-                return null;
-            });
+            CoroutineDispatcher.Instance.StartCoroutine(GetAudio(text, OnFinished));
         }
 
         /// <summary>
         /// Coroutine that handles creation of an AudioClip from a <paramref name="text"/>.
         /// </summary>
-        private IEnumerator GetAudio(IAsyncTask<AudioClip> task, string text)
+        private IEnumerator GetAudio(string text, Action<AudioClip> OnFinished)
         {
             string fullPath = PrepareFilepathForText(text);
 
@@ -171,18 +166,14 @@ namespace Innoactive.Hub.Training.TextToSpeech
 
             synthesizingThread.Start();
 
-            while (synthesizingThread.ThreadState == ThreadState.Running)
-            {
-                yield return null;
-            }
+            yield return new WaitUntil(() => synthesizingThread.ThreadState != ThreadState.Running);
 
             ClearCache(fullPath);
 
-            AudioClip result = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sound.Length, stream: false);
-
-            result.SetData(sound, 0);
-
-            task.InvokeOnFinished(result);
+            AudioClip audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sound.Length, stream: false);
+            audioClip.SetData(sound, 0);
+            
+            OnFinished.Invoke(audioClip);
         }
 
         /// <summary>
