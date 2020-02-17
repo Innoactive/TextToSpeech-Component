@@ -1,31 +1,31 @@
-using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
-using UnityEditor;
+using Innoactive.Hub.Training.TextToSpeech;
 using Innoactive.Hub.Training.Configuration;
 
 namespace Innoactive.Hub.TextToSpeech
 {
-    [CreateAssetMenu(fileName = "TextToSpeechConfiguration", menuName = "Innoactive/TextToSpeech Configuration", order = 1)]
     public class TextToSpeechConfiguration : ScriptableObject
     {
         /// <summary>
         /// Name of the <see cref="ITextToSpeechProvider"/>.
         /// </summary>
+        [HideInInspector]
         public string Provider;
 
         /// <summary>
         /// Language which should be used.
         /// </summary>
         /// <remarks>It depends on the chosen provider.</remarks>
-        public string Language;
+        public string Language = "En";
 
         /// <summary>
         /// Voice that should be used.
         /// </summary>
         /// <remarks>It depends on the chosen provider.</remarks>
-        public string Voice;
+        public string Voice = "Male";
 
         /// <summary>
         /// Usage of the standard HTML cache.
@@ -55,6 +55,11 @@ namespace Innoactive.Hub.TextToSpeech
         /// </summary>
         public string Auth;
 
+        public TextToSpeechConfiguration()
+        {
+            Provider = typeof(MicrosoftSapiTextToSpeechProvider).Name;
+        }
+
         /// <summary>
         /// Loads the first existing <see cref="TextToSpeechConfiguration"/> found in the project.
         /// If any <see cref="TextToSpeechConfiguration"/> exist in the project it creates and saves a new instance with default values (editor only).
@@ -62,29 +67,10 @@ namespace Innoactive.Hub.TextToSpeech
         /// <remarks>When used in runtime, this method can only retrieve config files located under a Resources folder.</remarks>
         public static TextToSpeechConfiguration LoadConfiguration()
         {
-            return CreateNewConfiguration();
-#if UNITY_EDITOR
-            string filter = $"t:{typeof(TextToSpeechConfiguration).Name}";
-            string[] configsGUIDs = AssetDatabase.FindAssets(filter);
-
-            if (configsGUIDs.Any())
-            {
-                string configFileGuid = configsGUIDs.First();
-                string configFilePath = AssetDatabase.GUIDToAssetPath(configFileGuid);
-                
-                return AssetDatabase.LoadAssetAtPath<TextToSpeechConfiguration>(configFilePath);
-            }
-#else
-            UnityEngine.Object[] configuration = Resources.FindObjectsOfTypeAll(typeof(TextToSpeechConfiguration));
-            
-            if (configuration.Any())
-            {
-                return configuration.First() as TextToSpeechConfiguration;
-            }
-#endif
-            return CreateNewConfiguration();
+            TextToSpeechConfiguration configuration = Resources.Load<TextToSpeechConfiguration>(typeof(TextToSpeechConfiguration).Name);
+            return configuration != null ? configuration : CreateNewConfiguration();
         }
-
+        
         private static TextToSpeechConfiguration CreateNewConfiguration()
         {
             TextToSpeechConfiguration textToSpeechConfiguration = CreateInstance<TextToSpeechConfiguration>();
@@ -100,8 +86,13 @@ namespace Innoactive.Hub.TextToSpeech
             }
             
             Debug.LogWarningFormat("No text to speech configuration found!\nA new configuration file was created at {0}", configFilePath);
-            AssetDatabase.CreateAsset(textToSpeechConfiguration, configFilePath);
-            AssetDatabase.Refresh();
+            UnityEditor.AssetDatabase.CreateAsset(textToSpeechConfiguration, configFilePath);
+            UnityEditor.AssetDatabase.Refresh();
+
+            if (Application.isPlaying == false)
+            {
+                UnityEditor.Selection.activeObject = textToSpeechConfiguration;
+            }
 #endif
             
             return textToSpeechConfiguration;
