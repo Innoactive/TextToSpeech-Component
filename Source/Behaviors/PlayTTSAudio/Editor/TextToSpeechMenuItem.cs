@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Innoactive.Hub.Training.Audio;
+using Innoactive.Creator.Localization;
 using Innoactive.Hub.Training.Editors.Configuration;
 
 namespace Innoactive.Hub.Training.Behaviors.Editors
