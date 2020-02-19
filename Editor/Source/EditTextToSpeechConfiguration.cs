@@ -8,7 +8,7 @@ namespace Innoactive.Hub.TextToSpeech
     /// </summary>
     public class EditTextToSpeechConfiguration : MonoBehaviour
     {
-        [MenuItem("Innoactive/Creator/Utilities/Edit TextToSpeech Configuration", false, 12)]
+        [MenuItem("Innoactive/Creator/Windows/TextToSpeech Settings", false, 12)]
         private static void EditTTSConfiguration()
         {
             Selection.activeObject = TextToSpeechConfiguration.LoadConfiguration();
