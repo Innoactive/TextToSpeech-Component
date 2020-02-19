@@ -6,7 +6,6 @@ using Innoactive.Hub.Training.Audio;
 using Innoactive.Hub.Training.Behaviors;
 using Innoactive.Hub.Training.Utils.Builders;
 using Innoactive.Hub.Unity.Tests.Training.Utils;
-using Innoactive.Hub.Training.Utils.Serialization;
 using UnityEngine.TestTools;
 using UnityEngine.Assertions;
 
@@ -28,7 +27,7 @@ namespace Innoactive.Hub.Unity.Tests.Training
                 .Build();
 
             // When we serialize and deserialize a training with it,
-            ICourse testCourse = JsonTrainingSerializer.Deserialize(JsonTrainingSerializer.Serialize(course));
+            ICourse testCourse =  Serializer.ToCourse(Serializer.ToByte(course));
 
             // Then the text to generate sound from should be the same.
             IAudioData data1 = ((PlayAudioBehavior)course.Data.FirstChapter.Data.FirstStep.Data.Behaviors.Data.Behaviors.First()).Data.AudioData;
