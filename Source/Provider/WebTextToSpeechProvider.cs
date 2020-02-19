@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using Innoactive.Hub.Threading;
@@ -35,9 +36,12 @@ namespace Innoactive.Hub.TextToSpeech
         }
 
         /// <inheritdoc/>
-        public void ConvertTextToSpeech(string text, Action<AudioClip> OnFinished)
+        public async Task<AudioClip> ConvertTextToSpeech(string text)
         {
-            CoroutineDispatcher.Instance.StartCoroutine(DownloadAudio(text, OnFinished));
+            TaskCompletionSource<AudioClip> taskCompletion = new TaskCompletionSource<AudioClip>();
+            CoroutineDispatcher.Instance.StartCoroutine(DownloadAudio(text, taskCompletion));
+
+            return await taskCompletion.Task;
         }
 
         #endregion
@@ -54,7 +58,7 @@ namespace Innoactive.Hub.TextToSpeech
         /// This method should asynchronous download the audio file to an AudioClip and call task OnFinish with it.
         /// You can use the ParseAudio method to convert the file (mp3) into an AudioClip.
         /// </summary>
-        protected virtual IEnumerator DownloadAudio(string text, Action<AudioClip> OnFinished)
+        protected virtual IEnumerator DownloadAudio(string text, TaskCompletionSource<AudioClip> task)
         {
             using (UnityWebRequest request = CreateRequest(GetAudioFileDownloadUrl(text), text))
             {
@@ -71,7 +75,7 @@ namespace Innoactive.Hub.TextToSpeech
                     }
                     else
                     {
-                        ParseAudio(data, OnFinished);
+                        ParseAudio(data, task);
                     }
                 }
                 else
@@ -102,13 +106,13 @@ namespace Innoactive.Hub.TextToSpeech
         }
         #endregion
 
-        private void ParseAudio(byte[] data, Action<AudioClip> OnFinished)
+        private void ParseAudio(byte[] data, TaskCompletionSource<AudioClip> task)
         {
             AudioClip clip = CreateAudioClip(data);
             
             if (clip.loadState == AudioDataLoadState.Loaded)
             {
-                OnFinished.Invoke(clip);
+                task.SetResult(clip);
             }
             else
             {

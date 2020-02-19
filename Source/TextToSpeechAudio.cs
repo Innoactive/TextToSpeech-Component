@@ -28,7 +28,6 @@ namespace Innoactive.Hub.Training.Audio
             }
         }
 
-        [JsonConstructor]
         protected TextToSpeechAudio()
         {
             text = new LocalizedString();
@@ -49,7 +48,7 @@ namespace Innoactive.Hub.Training.Audio
 
         public AudioClip AudioClip { get; private set; }
 
-        private void InitializeAudioClip()
+        private async void InitializeAudioClip()
         {
             if (Application.isPlaying == false)
             {
@@ -67,7 +66,7 @@ namespace Innoactive.Hub.Training.Audio
                 TextToSpeechConfiguration ttsConfiguration = RuntimeConfigurator.Configuration.GetTextToSpeechConfiguration();
                 ITextToSpeechProvider provider = TextToSpeechProviderFactory.Instance.CreateProvider(ttsConfiguration);
 
-                provider.ConvertTextToSpeech(Text.Value, clip => AudioClip = clip);
+                AudioClip = await provider.ConvertTextToSpeech(Text.Value);
             }
             catch (Exception exception)
             {

@@ -1,13 +1,10 @@
 using System;
 using System.IO;
-using System.Threading;
-using System.Collections;
-using Innoactive.Hub.Threading;
-using Innoactive.Hub.TextToSpeech;
-using Innoactive.Hub.Training.Utils;
 using SpeechLib;
 using UnityEngine;
-using ThreadPriority = System.Threading.ThreadPriority;
+using System.Threading.Tasks;
+using Innoactive.Hub.TextToSpeech;
+using Innoactive.Hub.Training.Utils;
 
 namespace Innoactive.Hub.Training.TextToSpeech
 {
@@ -104,76 +101,59 @@ namespace Innoactive.Hub.Training.TextToSpeech
         }
 
         /// <inheritdoc />
-        public void ConvertTextToSpeech(string text, Action<AudioClip> OnFinished)
+        public async Task<AudioClip> ConvertTextToSpeech(string text)
         {
-            CoroutineDispatcher.Instance.StartCoroutine(GetAudio(text, OnFinished));
-        }
-
-        /// <summary>
-        /// Coroutine that handles creation of an AudioClip from a <paramref name="text"/>.
-        /// </summary>
-        private IEnumerator GetAudio(string text, Action<AudioClip> OnFinished)
-        {
-            string fullPath = PrepareFilepathForText(text);
-
-            SpVoice synthesizer = new SpVoice();
-
-            // Despite the fact that SpVoice.AudioOutputStream accepts values of type ISpeechBaseStream,
-            // the single type of a stream that is actually working is a SpFileStream.
-            SpFileStream stream = PrepareFileStreamToWrite(fullPath);
-
-            synthesizer.AudioOutputStream = stream;
-
             // Try to get a valid two-letter ISO language code using the provided language in the configuration.
-            string twoLetterIsoCode;
-            if (configuration.Language.TryConvertToTwoLetterIsoCode(out twoLetterIsoCode) == false)
+            if (configuration.Language.TryConvertToTwoLetterIsoCode(out string twoLetterIsoCode) == false)
             {
                 // If it fails, use English as default language.
                 twoLetterIsoCode = "en";
-                Debug.LogWarningFormat(string.Format("The language \"{0}\" given in the training configuration is not valid. It was changed to default: \"en\".", configuration.Language));
+                Debug.LogWarningFormat("The language \"{0}\" given in the training configuration is not valid. It was changed to default: \"en\".", configuration.Language);
             }
 
             // Check the validity of the voice in the configuration.
             // If it is invalid, change it to neutral.
-            string genderOfVoice = configuration.Voice.ToLower();
-            switch (configuration.Voice.ToLower())
+            string voice = configuration.Voice;
+            
+            switch (voice)
             {
                 case "female":
                     break;
                 case "male":
                     break;
                 default:
-                    genderOfVoice = "neutral";
+                    voice = "neutral";
                     break;
             }
+            
+            string filePath = PrepareFilepathForText(text);
 
-            float[] sound = null;
-            Thread synthesizingThread = new Thread(() =>
-            {
-                string ssmlText = string.Format(ssmlTemplate, twoLetterIsoCode, genderOfVoice, text);
-                synthesizer.Speak(ssmlText, SpeechVoiceSpeakFlags.SVSFIsXML);
-                synthesizer.WaitUntilDone(-1);
-                stream.Close();
-
-                byte[] bytes = File.ReadAllBytes(fullPath);
-
-                float[] floats = ShortsInByteArrayToFloats(bytes);
-
-                sound = RemoveArtifacts(floats);
-            });
-
-            synthesizingThread.Priority = ThreadPriority.Lowest;
-
-            synthesizingThread.Start();
-
-            yield return new WaitUntil(() => synthesizingThread.ThreadState != ThreadState.Running);
-
-            ClearCache(fullPath);
+            float[] sound = await Task.Run( () => Synthesize(text, filePath, twoLetterIsoCode, voice) );
 
             AudioClip audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sound.Length, stream: false);
             audioClip.SetData(sound, 0);
             
-            OnFinished.Invoke(audioClip);
+            return audioClip;
+        }
+
+        private float[] Synthesize(string text, string outputPath, string language, string voice)
+        {
+            // Despite the fact that SpVoice.AudioOutputStream accepts values of type ISpeechBaseStream,
+            // the single type of a stream that is actually working is a SpFileStream.
+            SpFileStream stream = PrepareFileStreamToWrite(outputPath);
+            SpVoice synthesizer = new SpVoice { AudioOutputStream = stream };
+            
+            string ssmlText = string.Format(ssmlTemplate, language, voice, text);
+            synthesizer.Speak(ssmlText, SpeechVoiceSpeakFlags.SVSFIsXML);
+            synthesizer.WaitUntilDone(-1);
+            stream.Close();
+            
+            byte[] bytes = File.ReadAllBytes(outputPath);
+            float[] floats = ShortsInByteArrayToFloats(bytes);
+            
+            ClearCache(outputPath);
+            
+            return RemoveArtifacts(floats);
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using Innoactive.Hub.Threading;
@@ -35,35 +36,38 @@ namespace Innoactive.Hub.TextToSpeech
         }
 
         /// <inheritdoc/>
-        public void ConvertTextToSpeech(string text, Action<AudioClip> OnFinished)
+        public async Task<AudioClip> ConvertTextToSpeech(string text)
         {
             string filename = Configuration.GetUniqueTextToSpeechFilename(text);
             string path = GetPathToFile(filename);
+            AudioClip audioClip;
             
             if (File.Exists(path))
             {
-                CoroutineDispatcher.Instance.StartCoroutine(LoadAudioFromFile(path, OnFinished));
+                TaskCompletionSource<AudioClip> taskCompletion = new TaskCompletionSource<AudioClip>();
+                CoroutineDispatcher.Instance.StartCoroutine(LoadAudioFromFile(path, taskCompletion));
+                
+                audioClip = await taskCompletion.Task;
             }
             else
             {
-                FallbackProvider.ConvertTextToSpeech(text, audio =>
+                audioClip = await FallbackProvider.ConvertTextToSpeech(text);
+
+                if (Configuration.SaveAudioFilesToStreamingAssets)
                 {
-                    if (Configuration.SaveAudioFilesToStreamingAssets)
-                    {
-                        // Ensure target directory exists.
-                        string directory = Path.GetDirectoryName(path);
-                        
-                        if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
-                        {
-                            Directory.CreateDirectory(directory);
-                        }
-            
-                        AudioConverter.TryWriteAudioClipToFile(audio, path);
-                    }
+                    // Ensure target directory exists.
+                    string directory = Path.GetDirectoryName(path);
                     
-                    OnFinished.Invoke(audio);
-                });
+                    if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+        
+                    AudioConverter.TryWriteAudioClipToFile(audioClip, path);
+                }
             }
+            
+            return audioClip;
         }
 
         /// <inheritdoc/>
@@ -78,7 +82,7 @@ namespace Innoactive.Hub.TextToSpeech
             return directory;
         }
 
-        private IEnumerator LoadAudioFromFile(string path, Action<AudioClip> OnFinished)
+        private IEnumerator LoadAudioFromFile(string path, TaskCompletionSource<AudioClip> taskCompletion)
         {
             string url = $"file:///{UnityWebRequest.EscapeURL(path)}";
 
@@ -97,7 +101,7 @@ namespace Innoactive.Hub.TextToSpeech
                 }
                 else
                 {
-                    OnFinished.Invoke(clip);
+                    taskCompletion.SetResult(clip);
                 }
             }
             else

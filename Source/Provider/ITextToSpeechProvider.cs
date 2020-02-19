@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+using NUnit.Framework.Internal;
 using UnityEngine;
 
 namespace Innoactive.Hub.TextToSpeech
@@ -16,6 +18,6 @@ namespace Innoactive.Hub.TextToSpeech
         /// <summary>
         /// Loads the AudioClip file for the given text.
         /// </summary>
-        void ConvertTextToSpeech(string text, Action<AudioClip> OnFinished);
+        Task<AudioClip> ConvertTextToSpeech(string text);
     }
 }
