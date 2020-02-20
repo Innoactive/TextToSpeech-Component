@@ -1,17 +1,17 @@
+using System;
+using UnityEngine;
+using Newtonsoft.Json;
 using System.Runtime.Serialization;
 using Innoactive.Hub.TextToSpeech;
 using Innoactive.Hub.Training.Attributes;
 using Innoactive.Hub.Training.Configuration;
-using Newtonsoft.Json;
-using UnityEngine;
+using Innoactive.Creator.Internationalization;
 
 namespace Innoactive.Hub.Training.Audio
 {
     [DataContract(IsReference = true)]
     public class TextToSpeechAudio : IAudioData
     {
-        private static readonly Common.Logging.ILog logger = Logging.LogManager.GetLogger<TextToSpeechAudio>();
-
         private LocalizedString text;
 
         [DataMember]
@@ -29,7 +29,6 @@ namespace Innoactive.Hub.Training.Audio
             }
         }
 
-        [JsonConstructor]
         protected TextToSpeechAudio()
         {
             text = new LocalizedString();
@@ -50,7 +49,7 @@ namespace Innoactive.Hub.Training.Audio
 
         public AudioClip AudioClip { get; private set; }
 
-        private void InitializeAudioClip()
+        private async void InitializeAudioClip()
         {
             if (Application.isPlaying == false)
             {
@@ -59,29 +58,20 @@ namespace Innoactive.Hub.Training.Audio
 
             if (Text == null || string.IsNullOrEmpty(Text.Value))
             {
-                logger.Warn("No text provided.");
+                Debug.LogWarning("No text provided.");
                 return;
             }
 
             try
             {
-                ITextToSpeechProvider provider;
-                if (RuntimeConfigurator.Configuration.TextToSpeechConfig == null)
-                {
-                    provider = TextToSpeechProviderFactory.Instance.CreateProvider();
-                }
-                else
-                {
-                    provider = TextToSpeechProviderFactory.Instance.CreateProvider(RuntimeConfigurator.Configuration.TextToSpeechConfig);
-                }
+                TextToSpeechConfiguration ttsConfiguration = RuntimeConfigurator.Configuration.GetTextToSpeechConfiguration();
+                ITextToSpeechProvider provider = TextToSpeechProviderFactory.Instance.CreateProvider(ttsConfiguration);
 
-                provider.ConvertTextToSpeech(Text.Value)
-                    .OnFinished((clip) => { AudioClip = clip; })
-                    .Execute();
+                AudioClip = await provider.ConvertTextToSpeech(Text.Value);
             }
-            catch (TextToSpeechProviderFactory.NoConfigurationFoundException)
+            catch (Exception exception)
             {
-                logger.Warn("No text to speech configuration found!");
+                Debug.LogWarning(exception.Message);
             }
         }
     }
