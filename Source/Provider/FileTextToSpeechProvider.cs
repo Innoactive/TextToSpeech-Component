@@ -1,15 +1,13 @@
-﻿using UnityEngine;
-using Innoactive.Hub.SDK;
-using System;
+﻿using System;
 using System.IO;
 using System.Collections;
-using Common.Logging;
-using Innoactive.Hub.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.Networking;
+using Innoactive.Hub.Threading;
 
 namespace Innoactive.Hub.TextToSpeech
 {
-    
     /// <summary>
     /// The disk based provider for text to speech, which is using the streaming assets folder.
     /// On the first step we check if the application has files provided on delivery.
@@ -18,94 +16,75 @@ namespace Innoactive.Hub.TextToSpeech
     /// </summary>
     public class FileTextToSpeechProvider : ITextToSpeechProvider
     {
-        private static readonly ILog logger = Logging.LogManager.GetLogger<FileTextToSpeechProvider>();
-
         protected readonly ITextToSpeechProvider FallbackProvider;
 
         protected readonly IAudioConverter AudioConverter = new NAudioConverter();
 
-        protected TextToSpeechConfig Config;
+        protected TextToSpeechConfiguration Configuration;
 
-        public FileTextToSpeechProvider(ITextToSpeechProvider fallbackProvider, TextToSpeechConfig config)
+        public FileTextToSpeechProvider(ITextToSpeechProvider fallbackProvider, TextToSpeechConfiguration configuration)
         {
-            Config = config;
+            Configuration = configuration;
             FallbackProvider = fallbackProvider;
         }
 
-        public FileTextToSpeechProvider(ITextToSpeechProvider fallbackProvider, IAudioConverter audioConverter, TextToSpeechConfig config)
+        public FileTextToSpeechProvider(ITextToSpeechProvider fallbackProvider, IAudioConverter audioConverter, TextToSpeechConfiguration configuration)
         {
-            Config = config;
+            Configuration = configuration;
             AudioConverter = audioConverter;
             FallbackProvider = fallbackProvider;
         }
 
         /// <inheritdoc/>
-        public IAsyncTask<AudioClip> ConvertTextToSpeech(string text)
+        public async Task<AudioClip> ConvertTextToSpeech(string text)
         {
-            return new AsyncTask<AudioClip>(task =>
+            string filename = Configuration.GetUniqueTextToSpeechFilename(text);
+            string path = GetPathToFile(filename);
+            AudioClip audioClip;
+            
+            if (File.Exists(path))
             {
-                string filename = Config.GetUniqueTextToSpeechFilename(text);
-                string path = GetPathToFile(filename);
-                if (File.Exists(path))
+                TaskCompletionSource<AudioClip> taskCompletion = new TaskCompletionSource<AudioClip>();
+                CoroutineDispatcher.Instance.StartCoroutine(LoadAudioFromFile(path, taskCompletion));
+                
+                audioClip = await taskCompletion.Task;
+            }
+            else
+            {
+                audioClip = await FallbackProvider.ConvertTextToSpeech(text);
+
+                if (Configuration.SaveAudioFilesToStreamingAssets)
                 {
-                    try
+                    // Ensure target directory exists.
+                    string directory = Path.GetDirectoryName(path);
+                    
+                    if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
                     {
-                        CoroutineDispatcher.Instance.StartCoroutine(LoadAudioFromFile(path, task));
+                        Directory.CreateDirectory(directory);
                     }
-                    catch (Exception ex)
-                    {
-                        task.InvokeOnError(ex);
-                    }
-
-                    return null;
+        
+                    AudioConverter.TryWriteAudioClipToFile(audioClip, path);
                 }
-                else
-                {
-                    IAsyncTask<AudioClip> downloadTask = FallbackProvider.ConvertTextToSpeech(text);
-                    downloadTask.OnError(task.InvokeOnError);
-                    downloadTask.OnFinished(audio =>
-                    {
-                        if (Config.SaveAudioFilesToStreamingAssets)
-                        {
-                            // Ensure target directory exists.
-                            string directory = Path.GetDirectoryName(path);
-                            if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
-                            {
-                                Directory.CreateDirectory(directory);
-                            }
-
-                            AudioConverter.TryWriteAudioClipToFile(audio, path);
-                        }
-
-                        task.InvokeOnFinished(audio);
-                    });
-
-                    return downloadTask.Execute();
-                }
-            });
+            }
+            
+            return audioClip;
         }
 
         /// <inheritdoc/>
-        public void SetConfig(TextToSpeechConfig config)
+        public void SetConfig(TextToSpeechConfiguration configuration)
         {
-            Config = config;
+            Configuration = configuration;
         }
 
         protected virtual string GetPathToFile(string filename)
         {
-            string directory = Application.dataPath + "/StreamingAssets/" + Config.StreamingAssetCacheDirectoryName;
-            return directory + "/" + filename;
+            string directory = $"{Application.streamingAssetsPath}/{Configuration.StreamingAssetCacheDirectoryName}/{filename}";
+            return directory;
         }
 
-        private IEnumerator LoadAudioFromFile(string path, IAsyncTask<AudioClip> task)
+        private IEnumerator LoadAudioFromFile(string path, TaskCompletionSource<AudioClip> taskCompletion)
         {
-#if UNITY_2017_3_OR_NEWER
-            string url = UnityWebRequest.EscapeURL(path);
-#else
-            string url = WWW.EscapeURL(path);
-#endif
-
-            url = "file:///" + url;
+            string url = $"file:///{UnityWebRequest.EscapeURL(path)}";
 
             UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.UNKNOWN);
 
@@ -114,20 +93,21 @@ namespace Innoactive.Hub.TextToSpeech
             if (request.isNetworkError == false && request.isHttpError == false)
             {
                 AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+                
                 if (clip == null)
                 {
-                    logger.ErrorFormat("Could not load AudioClip '{0}' - AudioClip is null.", path);
-                    task.InvokeOnError(new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!"));
+                    Debug.LogErrorFormat("Could not load AudioClip '{0}' - AudioClip is null.", path);
+                    throw new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!");
                 }
                 else
                 {
-                    task.InvokeOnFinished(clip);
+                    taskCompletion.SetResult(clip);
                 }
             }
             else
             {
-                logger.ErrorFormat("Could not load AudioClip '{0}': {1}", path, request.error);
-                task.InvokeOnError(new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!"));
+                Debug.LogErrorFormat("Could not load AudioClip '{0}': {1}", path, request.error);
+                throw new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!");
             }
         }
 

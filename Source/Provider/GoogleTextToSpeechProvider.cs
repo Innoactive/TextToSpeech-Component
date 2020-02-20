@@ -1,5 +1,4 @@
-﻿using Innoactive.Hub.SDK;
-using System.Collections.Generic;
+﻿using UnityEngine.Networking;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -12,13 +11,13 @@ namespace Innoactive.Hub.TextToSpeech
 
         public GoogleTextToSpeechProvider() : base() { }
 
-        public GoogleTextToSpeechProvider(IHttpProvider httpProvider) : base(httpProvider) { }
+        public GoogleTextToSpeechProvider(UnityWebRequest unityWebRequest) : base(unityWebRequest) { }
 
-        public GoogleTextToSpeechProvider(IHttpProvider httpProvider, IAudioConverter audioConverter) : base(httpProvider, audioConverter) { }
+        public GoogleTextToSpeechProvider(UnityWebRequest unityWebRequest, IAudioConverter audioConverter) : base(unityWebRequest, audioConverter) { }
 
         protected override string GetAudioFileDownloadUrl(string text)
         {
-            return string.Format(URL, text, Config.Language, Config.Voice);
+            return string.Format(URL, text, Configuration.Language, Configuration.Voice);
         }
     }
 }

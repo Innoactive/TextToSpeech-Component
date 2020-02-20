@@ -1,8 +1,9 @@
-using Common.Logging;
-using Innoactive.Hub.SDK;
 using System;
+using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using Innoactive.Hub.Threading;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -11,40 +12,38 @@ namespace Innoactive.Hub.TextToSpeech
     /// </summary>
     public abstract class WebTextToSpeechProvider : ITextToSpeechProvider
     {
-        private static readonly ILog logger = LogManager.GetLogger<WebTextToSpeechProvider>();
+        protected TextToSpeechConfiguration Configuration;
 
-        protected TextToSpeechConfig Config;
-
-        protected readonly IHttpProvider HttpProvider;
+        protected readonly UnityWebRequest UnityWebRequest;
 
         protected readonly IAudioConverter AudioConverter;
 
-        protected WebTextToSpeechProvider() : this(new DotNetWebRequestHttpProvider()) { }
+        protected WebTextToSpeechProvider() : this(new UnityWebRequest()) { }
 
-        protected WebTextToSpeechProvider(IHttpProvider httpProvider) : this(httpProvider, new NAudioConverter()) { }
+        protected WebTextToSpeechProvider(UnityWebRequest unityWebRequest) : this(unityWebRequest, new NAudioConverter()) { }
 
-        protected WebTextToSpeechProvider(IHttpProvider httpProvider, IAudioConverter audioConverter)
+        protected WebTextToSpeechProvider(UnityWebRequest unityWebRequest, IAudioConverter audioConverter)
         {
-            HttpProvider = httpProvider;
+            UnityWebRequest = unityWebRequest;
             AudioConverter = audioConverter;
         }
 
         #region Public Interface
         /// <inheritdoc/>
-        public void SetConfig(TextToSpeechConfig config)
+        public void SetConfig(TextToSpeechConfiguration configuration)
         {
-            Config = config;
+            Configuration = configuration;
         }
 
         /// <inheritdoc/>
-        public IAsyncTask<AudioClip> ConvertTextToSpeech(string text)
+        public async Task<AudioClip> ConvertTextToSpeech(string text)
         {
-            return new AsyncTask<AudioClip>((task) =>
-            {
-                DownloadAudio(text, task);
-                return null;
-            });
+            TaskCompletionSource<AudioClip> taskCompletion = new TaskCompletionSource<AudioClip>();
+            CoroutineDispatcher.Instance.StartCoroutine(DownloadAudio(text, taskCompletion));
+
+            return await taskCompletion.Task;
         }
+
         #endregion
 
         #region Download handling
@@ -59,45 +58,47 @@ namespace Innoactive.Hub.TextToSpeech
         /// This method should asynchronous download the audio file to an AudioClip and call task OnFinish with it.
         /// You can use the ParseAudio method to convert the file (mp3) into an AudioClip.
         /// </summary>
-        protected virtual void DownloadAudio(string text, IAsyncTask<AudioClip> task)
+        protected virtual IEnumerator DownloadAudio(string text, TaskCompletionSource<AudioClip> task)
         {
-            IHttpRequest request = CreateRequest(GetAudioFileDownloadUrl(text), text);
-            IAsyncTask<IHttpResponse<byte[]>> webTask = HttpProvider.Send<byte[]>(request);
-            webTask.OnFinished((result) =>
+            using (UnityWebRequest request = CreateRequest(GetAudioFileDownloadUrl(text), text))
             {
-                byte[] data = result.Data;
+                // Request and wait for the response.
+                yield return request.SendWebRequest();
 
-                if (result.StatusCode != 200 || data.Length == 0)
+                if (request.isNetworkError == false && request.isHttpError == false)
                 {
-                    string errorMsg = string.Format("Error while fetching audio from '{0}' backend, code: '{1}'", request.Url.ToString(), result.StatusCode);
-                    logger.Error(errorMsg);
-                    task.InvokeOnError(new DownloadFailedException(errorMsg));
+                    byte[] data = request.downloadHandler.data;
+
+                    if (data == null || data.Length == 0)
+                    {
+                        throw new DownloadFailedException($"Error while retrieving audio: '{request.error}'");
+                    }
+                    else
+                    {
+                        ParseAudio(data, task);
+                    }
                 }
                 else
                 {
-                    ParseAudio(data, task);
+                    throw new DownloadFailedException($"Error while fetching audio from '{request.uri}' backend, error: '{request.error}'");
                 }
-            });
-            webTask.OnError(task.InvokeOnError);
-            webTask.Execute();
+            }
         }
 
         /// <summary>
-        /// Method to create the HttpRequest needed to get the file. If you have to add specific authorization or other
-        /// header you can do it here.
+        /// Method to create the UnityWebRequest needed to get the file.
+        /// If you have to add specific authorization or other header you can do it here.
         /// </summary>
-        protected virtual IHttpRequest CreateRequest(string url, string text)
+        protected virtual UnityWebRequest CreateRequest(string url, string text)
         {
-#if UNITY_2017_3_OR_NEWER
             string escapedText = UnityWebRequest.EscapeURL(text);
-#else
-            string escapedText = WWW.EscapeURL(text);
-#endif
-            return new HttpRequest(new Uri(string.Format(url, escapedText)));
+            Uri uri = new Uri(string.Format(url, escapedText));
+            
+            return UnityWebRequest.Get(uri);
         }
 
         /// <summary>
-        /// This method converts an mp3 file from byte to an Audioclip. If you have a different format, override this method.
+        /// This method converts an mp3 file from byte to an AudioClip. If you have a different format, override this method.
         /// </summary>
         protected virtual AudioClip CreateAudioClip(byte[] data)
         {
@@ -105,29 +106,25 @@ namespace Innoactive.Hub.TextToSpeech
         }
         #endregion
 
-        private void ParseAudio(byte[] data, IAsyncTask<AudioClip> task)
+        private void ParseAudio(byte[] data, TaskCompletionSource<AudioClip> task)
         {
-            try
+            AudioClip clip = CreateAudioClip(data);
+            
+            if (clip.loadState == AudioDataLoadState.Loaded)
             {
-                AudioClip clip = CreateAudioClip(data);
-                if (clip.loadState == AudioDataLoadState.Loaded)
-                {
-                    task.InvokeOnFinished(clip);
-                }
-                else
-                {
-                    task.InvokeOnError(new UnableToParseAudioFormatException("Creating AudioClip failed for text"));
-                }
+                task.SetResult(clip);
             }
-            catch (Exception ex)
+            else
             {
-                task.InvokeOnError(ex);
+                throw new UnableToParseAudioFormatException("Creating AudioClip failed for text");
             }
         }
 
         public class DownloadFailedException : Exception
         {
             public DownloadFailedException(string msg) : base(msg) { }
+            
+            public DownloadFailedException(string msg, Exception ex) : base(msg, ex) { }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Innoactive.Hub.SDK;
+﻿using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -11,18 +12,19 @@ namespace Innoactive.Hub.TextToSpeech
 
         public WatsonTextToSpeechProvider() : base() { }
 
-        public WatsonTextToSpeechProvider(IHttpProvider httpProvider) : base(httpProvider) { }
+        public WatsonTextToSpeechProvider(UnityWebRequest unityWebRequest) : base(unityWebRequest) { }
 
-        protected override IHttpRequest CreateRequest(string url, string text)
+        protected override UnityWebRequest CreateRequest(string url, string text)
         {
-            IHttpRequest request = base.CreateRequest(url, text);
-            request.Headers["Authorization"] = Config.Auth;
+            UnityWebRequest request = base.CreateRequest(url, text);
+            request.SetRequestHeader("Authorization", Configuration.Auth);
+            
             return request;
         }
 
         protected override string GetAudioFileDownloadUrl(string text)
         {
-            return string.Format(URL, text, Config.Language, Config.Voice);
+            return string.Format(URL, text, Configuration.Language, Configuration.Voice);
         }
     }
 }
