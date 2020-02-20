@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using Innoactive.Hub.TextToSpeech;
 using Innoactive.Hub.Training.Attributes;
 using Innoactive.Hub.Training.Configuration;
-using Innoactive.Creator.Localization;
+using Innoactive.Creator.Internationalization;
 
 namespace Innoactive.Hub.Training.Audio
 {

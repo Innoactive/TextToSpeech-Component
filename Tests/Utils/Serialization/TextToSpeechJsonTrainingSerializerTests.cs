@@ -6,7 +6,7 @@ using Innoactive.Hub.Training.Audio;
 using Innoactive.Hub.Training.Behaviors;
 using Innoactive.Hub.Training.Utils.Builders;
 using Innoactive.Hub.Unity.Tests.Training.Utils;
-using Innoactive.Creator.Localization;
+using Innoactive.Creator.Internationalization;
 using UnityEngine.TestTools;
 using UnityEngine.Assertions;
 
