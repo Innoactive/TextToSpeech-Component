@@ -49,22 +49,6 @@ namespace Innoactive.Hub.Training.TextToSpeech
         }
 
         /// <summary>
-        /// The result comes in byte array, but there are actually short values inside (ranged from short.Min to short.Max).
-        /// </summary>
-        private static float[] ShortsInByteArrayToFloats(byte[] shorts)
-        {
-            float[] floats = new float[shorts.Length / 2];
-
-            for (int i = 0; i < floats.Length; i++)
-            {
-                short restoredShort = (short) ((shorts[i * 2 + 1] << 8) | (shorts[i * 2]));
-                floats[i] = restoredShort / (float) short.MaxValue;
-            }
-
-            return floats;
-        }
-
-        /// <summary>
         /// When the speech is generated in a separate tread, there are clicking sounds at the beginning and at the end of audio data.
         /// </summary>
         private static float[] RemoveArtifacts(float[] floats)
@@ -149,7 +133,7 @@ namespace Innoactive.Hub.Training.TextToSpeech
             stream.Close();
             
             byte[] bytes = File.ReadAllBytes(outputPath);
-            float[] floats = ShortsInByteArrayToFloats(bytes);
+            float[] floats = TextToSpeechUtils.ShortsInByteArrayToFloats(bytes);
             
             ClearCache(outputPath);
             

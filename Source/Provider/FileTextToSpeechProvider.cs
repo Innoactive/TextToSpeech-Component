@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
-using Innoactive.Hub.Threading;
+using Innoactive.Creator.IO;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -39,15 +37,16 @@ namespace Innoactive.Hub.TextToSpeech
         public async Task<AudioClip> ConvertTextToSpeech(string text)
         {
             string filename = Configuration.GetUniqueTextToSpeechFilename(text);
-            string path = GetPathToFile(filename);
+            string filePath = GetPathToFile(filename);
             AudioClip audioClip;
             
-            if (File.Exists(path))
+            if (FileManager.StreamingAssetsFileExists(filePath))
             {
-                TaskCompletionSource<AudioClip> taskCompletion = new TaskCompletionSource<AudioClip>();
-                CoroutineDispatcher.Instance.StartCoroutine(LoadAudioFromFile(path, taskCompletion));
-                
-                audioClip = await taskCompletion.Task;
+                byte[] bytes = await FileManager.RetrieveFileFromStreamingAssets(filePath);
+                float[] sound = TextToSpeechUtils.ShortsInByteArrayToFloats(bytes);
+
+                audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sound.Length, stream: false);
+                audioClip.SetData(sound, 0);
             }
             else
             {
@@ -56,15 +55,20 @@ namespace Innoactive.Hub.TextToSpeech
                 if (Configuration.SaveAudioFilesToStreamingAssets)
                 {
                     // Ensure target directory exists.
-                    string directory = Path.GetDirectoryName(path);
+                    string directory = Path.GetDirectoryName(filePath);
                     
                     if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
                     {
                         Directory.CreateDirectory(directory);
                     }
-        
-                    AudioConverter.TryWriteAudioClipToFile(audioClip, path);
+
+                    AudioConverter.TryWriteAudioClipToFile(audioClip, filePath);
                 }
+            }
+
+            if (audioClip == null)
+            {
+                throw new CouldNotLoadAudioFileException("AudioClip is null.");
             }
             
             return audioClip;
@@ -78,39 +82,10 @@ namespace Innoactive.Hub.TextToSpeech
 
         protected virtual string GetPathToFile(string filename)
         {
-            string directory = $"{Application.streamingAssetsPath}/{Configuration.StreamingAssetCacheDirectoryName}/{filename}";
+            string directory = $"{Configuration.StreamingAssetCacheDirectoryName}/{filename}";
             return directory;
         }
-
-        private IEnumerator LoadAudioFromFile(string path, TaskCompletionSource<AudioClip> taskCompletion)
-        {
-            string url = $"file:///{UnityWebRequest.EscapeURL(path)}";
-
-            UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.UNKNOWN);
-
-            yield return request.SendWebRequest();
-
-            if (request.isNetworkError == false && request.isHttpError == false)
-            {
-                AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
-                
-                if (clip == null)
-                {
-                    Debug.LogErrorFormat("Could not load AudioClip '{0}' - AudioClip is null.", path);
-                    throw new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!");
-                }
-                else
-                {
-                    taskCompletion.SetResult(clip);
-                }
-            }
-            else
-            {
-                Debug.LogErrorFormat("Could not load AudioClip '{0}': {1}", path, request.error);
-                throw new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!");
-            }
-        }
-
+        
         public class CouldNotLoadAudioFileException : Exception
         {
             public CouldNotLoadAudioFileException(string msg) : base(msg) { }
