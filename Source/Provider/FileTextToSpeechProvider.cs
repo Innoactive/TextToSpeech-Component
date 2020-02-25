@@ -40,9 +40,9 @@ namespace Innoactive.Hub.TextToSpeech
             string filePath = GetPathToFile(filename);
             AudioClip audioClip;
             
-            if (FileManager.StreamingAssetsFileExists(filePath))
+            if (IsFileCached(filePath))
             {
-                byte[] bytes = await FileManager.RetrieveFileFromStreamingAssets(filePath);
+                byte[] bytes = await GetCachedFile(filePath);
                 float[] sound = TextToSpeechUtils.ShortsInByteArrayToFloats(bytes);
 
                 audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sound.Length, stream: false);
@@ -54,15 +54,7 @@ namespace Innoactive.Hub.TextToSpeech
 
                 if (Configuration.SaveAudioFilesToStreamingAssets)
                 {
-                    // Ensure target directory exists.
-                    string directory = Path.GetDirectoryName(filePath);
-                    
-                    if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
-
-                    AudioConverter.TryWriteAudioClipToFile(audioClip, filePath);
+                    CacheAudio(audioClip, filePath);
                 }
             }
 
@@ -80,10 +72,68 @@ namespace Innoactive.Hub.TextToSpeech
             Configuration = configuration;
         }
 
+        /// <summary>
+        /// Returns the relative location were the file is cached.
+        /// </summary>
         protected virtual string GetPathToFile(string filename)
         {
             string directory = $"{Configuration.StreamingAssetCacheDirectoryName}/{filename}";
             return directory;
+        }
+
+        /// <summary>
+        /// Stores given <paramref name="audioClip"/> in a cached directory.
+        /// </summary>
+        /// <remarks>When used in the Unity Editor the cached directory is inside the StreamingAssets folder; Otherwise during runtime the base path is the platform
+        /// persistent data.</remarks>
+        /// <param name="audioClip">The audio file to be cached.</param>
+        /// <param name="filePath">Relative path where the <paramref name="audioClip"/> will be stored.</param>
+        /// <returns>True if the file was successfully cached.</returns>
+        protected virtual bool CacheAudio(AudioClip audioClip, string filePath)
+        {
+            // Ensure target directory exists.
+            string fileName = Path.GetFileName(filePath);
+            string relativePath = Path.GetDirectoryName(filePath);
+            
+            string basedDirectoryPath = Application.isEditor ? FileManager.StreamingAssetsPath : FileManager.PersistentDataPath;
+            string absolutePath = Path.Combine(basedDirectoryPath, relativePath);
+                    
+            if (string.IsNullOrEmpty(absolutePath) == false && Directory.Exists(absolutePath) == false)
+            {
+                Directory.CreateDirectory(absolutePath);
+            }
+
+            string absoluteFilePath = Path.Combine(absolutePath, fileName);
+
+            return AudioConverter.TryWriteAudioClipToFile(audioClip, absoluteFilePath);
+        }
+
+        /// <summary>
+        /// Retrieves a cached file.
+        /// </summary>
+        /// <param name="filePath">Relative path where the cached file is stored.</param>
+        /// <returns>An asynchronous operation that returns a byte array containing the contents of the file.</returns>
+        protected virtual async Task<byte[]> GetCachedFile(string filePath)
+        {
+            if (FileManager.FileExistsInStreamingAssets(filePath))
+            {
+                return await FileManager.RetrieveFileFromStreamingAssets(filePath);
+            }
+            
+            if (FileManager.FileExistsInPersistentData(filePath))
+            {
+                return FileManager.RetrieveFileFromPersistentData(filePath);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns true is a file is cached in given relative <paramref name="filePath"/>.
+        /// </summary>
+        protected virtual bool IsFileCached(string filePath)
+        {
+            return FileManager.FileExistsInStreamingAssets(filePath) || FileManager.FileExistsInPersistentData(filePath);
         }
         
         public class CouldNotLoadAudioFileException : Exception
