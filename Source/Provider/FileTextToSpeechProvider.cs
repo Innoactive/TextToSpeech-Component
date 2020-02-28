@@ -38,13 +38,13 @@ namespace Innoactive.Hub.TextToSpeech
         {
             string filename = Configuration.GetUniqueTextToSpeechFilename(text);
             string filePath = GetPathToFile(filename);
-            AudioClip audioClip;
+            AudioClip audioClip = null;
             
             if (IsFileCached(filePath))
             {
-                byte[] bytes = await GetCachedFile(filePath);
+                byte[] bytes = GetCachedFile(filePath);
                 float[] sound = TextToSpeechUtils.ShortsInByteArrayToFloats(bytes);
-
+                
                 audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sound.Length, stream: false);
                 audioClip.SetData(sound, 0);
             }
@@ -95,16 +95,16 @@ namespace Innoactive.Hub.TextToSpeech
             string fileName = Path.GetFileName(filePath);
             string relativePath = Path.GetDirectoryName(filePath);
             
-            string basedDirectoryPath = Application.isEditor ? FileManager.StreamingAssetsPath : FileManager.PersistentDataPath;
+            string basedDirectoryPath = Application.isEditor ? Application.streamingAssetsPath : Application.persistentDataPath;
             string absolutePath = Path.Combine(basedDirectoryPath, relativePath);
                     
             if (string.IsNullOrEmpty(absolutePath) == false && Directory.Exists(absolutePath) == false)
             {
                 Directory.CreateDirectory(absolutePath);
             }
-
+        
             string absoluteFilePath = Path.Combine(absolutePath, fileName);
-
+        
             return AudioConverter.TryWriteAudioClipToFile(audioClip, absoluteFilePath);
         }
 
@@ -113,19 +113,9 @@ namespace Innoactive.Hub.TextToSpeech
         /// </summary>
         /// <param name="filePath">Relative path where the cached file is stored.</param>
         /// <returns>An asynchronous operation that returns a byte array containing the contents of the file.</returns>
-        protected virtual async Task<byte[]> GetCachedFile(string filePath)
+        protected virtual byte[] GetCachedFile(string filePath)
         {
-            if (FileManager.FileExistsInStreamingAssets(filePath))
-            {
-                return await FileManager.RetrieveFileFromStreamingAssets(filePath);
-            }
-            
-            if (FileManager.FileExistsInPersistentData(filePath))
-            {
-                return FileManager.RetrieveFileFromPersistentData(filePath);
-            }
-
-            return null;
+            return FileManager.Read(filePath);
         }
 
         /// <summary>
@@ -133,7 +123,7 @@ namespace Innoactive.Hub.TextToSpeech
         /// </summary>
         protected virtual bool IsFileCached(string filePath)
         {
-            return FileManager.FileExistsInStreamingAssets(filePath) || FileManager.FileExistsInPersistentData(filePath);
+            return FileManager.Exists(filePath);
         }
         
         public class CouldNotLoadAudioFileException : Exception
