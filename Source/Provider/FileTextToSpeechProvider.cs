@@ -38,7 +38,7 @@ namespace Innoactive.Hub.TextToSpeech
         {
             string filename = Configuration.GetUniqueTextToSpeechFilename(text);
             string filePath = GetPathToFile(filename);
-            AudioClip audioClip = null;
+            AudioClip audioClip;
             
             if (IsFileCached(filePath))
             {
@@ -97,7 +97,7 @@ namespace Innoactive.Hub.TextToSpeech
             
             string basedDirectoryPath = Application.isEditor ? Application.streamingAssetsPath : Application.persistentDataPath;
             string absolutePath = Path.Combine(basedDirectoryPath, relativePath);
-                    
+            
             if (string.IsNullOrEmpty(absolutePath) == false && Directory.Exists(absolutePath) == false)
             {
                 Directory.CreateDirectory(absolutePath);
