@@ -49,22 +49,6 @@ namespace Innoactive.Hub.Training.TextToSpeech
         }
 
         /// <summary>
-        /// The result comes in byte array, but there are actually short values inside (ranged from short.Min to short.Max).
-        /// </summary>
-        private static float[] ShortsInByteArrayToFloats(byte[] shorts)
-        {
-            float[] floats = new float[shorts.Length / 2];
-
-            for (int i = 0; i < floats.Length; i++)
-            {
-                short restoredShort = (short) ((shorts[i * 2 + 1] << 8) | (shorts[i * 2]));
-                floats[i] = restoredShort / (float) short.MaxValue;
-            }
-
-            return floats;
-        }
-
-        /// <summary>
         /// When the speech is generated in a separate tread, there are clicking sounds at the beginning and at the end of audio data.
         /// </summary>
         private static float[] RemoveArtifacts(float[] floats)
@@ -127,16 +111,15 @@ namespace Innoactive.Hub.Training.TextToSpeech
             }
             
             string filePath = PrepareFilepathForText(text);
+            float[] sampleData = await Synthesize(text, filePath, twoLetterIsoCode, voice);
 
-            float[] sound = await Task.Run( () => Synthesize(text, filePath, twoLetterIsoCode, voice) );
-
-            AudioClip audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sound.Length, stream: false);
-            audioClip.SetData(sound, 0);
+            AudioClip audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sampleData.Length, stream: false);
+            audioClip.SetData(sampleData, 0);
             
             return audioClip;
         }
 
-        private float[] Synthesize(string text, string outputPath, string language, string voice)
+        private async Task<float[]> Synthesize(string text, string outputPath, string language, string voice)
         {
             // Despite the fact that SpVoice.AudioOutputStream accepts values of type ISpeechBaseStream,
             // the single type of a stream that is actually working is a SpFileStream.
@@ -148,12 +131,13 @@ namespace Innoactive.Hub.Training.TextToSpeech
             synthesizer.WaitUntilDone(-1);
             stream.Close();
             
-            byte[] bytes = File.ReadAllBytes(outputPath);
-            float[] floats = ShortsInByteArrayToFloats(bytes);
+            byte[] data = File.ReadAllBytes(outputPath);
+            float[] sampleData = TextToSpeechUtils.ShortsInByteArrayToFloats(data);
+            float[] cleanData = RemoveArtifacts(sampleData);
             
             ClearCache(outputPath);
             
-            return RemoveArtifacts(floats);
+            return cleanData;
         }
 
         /// <summary>

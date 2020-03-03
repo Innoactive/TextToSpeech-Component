@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using Newtonsoft.Json;
 using System.Runtime.Serialization;
 using Innoactive.Hub.TextToSpeech;
 using Innoactive.Hub.Training.Attributes;
@@ -9,9 +8,13 @@ using Innoactive.Creator.Internationalization;
 
 namespace Innoactive.Hub.Training.Audio
 {
+    /// <summary>
+    /// This class retrieves and stores AudioClips generated based in a provided localized text. 
+    /// </summary>
     [DataContract(IsReference = true)]
     public class TextToSpeechAudio : IAudioData
     {
+        private bool isLoading;
         private LocalizedString text;
 
         [DataMember]
@@ -39,12 +42,23 @@ namespace Innoactive.Hub.Training.Audio
             Text = text;
         }
 
+        /// <summary>
+        /// True when there is an Audio Clip loaded.
+        /// </summary>
         public bool HasAudioClip
         {
             get
             {
                 return AudioClip != null;
             }
+        }
+
+        /// <summary>
+        /// Returns true only when is busy loading an Audio Clip.
+        /// </summary>
+        public bool IsLoading
+        {
+            get { return isLoading; }
         }
 
         public AudioClip AudioClip { get; private set; }
@@ -62,6 +76,8 @@ namespace Innoactive.Hub.Training.Audio
                 return;
             }
 
+            isLoading = true;
+            
             try
             {
                 TextToSpeechConfiguration ttsConfiguration = RuntimeConfigurator.Configuration.GetTextToSpeechConfiguration();
@@ -73,6 +89,8 @@ namespace Innoactive.Hub.Training.Audio
             {
                 Debug.LogWarning(exception.Message);
             }
+            
+            isLoading = false;
         }
     }
 }

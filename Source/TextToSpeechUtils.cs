@@ -14,6 +14,22 @@ namespace Innoactive.Hub.TextToSpeech
             return string.Format(@"TTS_{0}_{1}_{2}.{3}", configuration.Provider, configuration.Language, GetMd5Hash(hash).Replace("-", ""), format);
         }
         
+        /// <summary>
+        /// The result comes in byte array, but there are actually short values inside (ranged from short.Min to short.Max).
+        /// </summary>
+        public static float[] ShortsInByteArrayToFloats(byte[] shorts)
+        {
+            float[] floats = new float[shorts.Length / 2];
+
+            for (int i = 0; i < floats.Length; i++)
+            {
+                short restoredShort = (short) ((shorts[i * 2 + 1] << 8) | (shorts[i * 2]));
+                floats[i] = restoredShort / (float) short.MaxValue;
+            }
+
+            return floats;
+        }
+        
         private static string GetMd5Hash(string input)
         {
             using (MD5 md5Hash = MD5.Create())

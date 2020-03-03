@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
-using Innoactive.Hub.Threading;
+using Innoactive.Creator.IO;
 
 namespace Innoactive.Hub.TextToSpeech
 {
@@ -39,15 +37,16 @@ namespace Innoactive.Hub.TextToSpeech
         public async Task<AudioClip> ConvertTextToSpeech(string text)
         {
             string filename = Configuration.GetUniqueTextToSpeechFilename(text);
-            string path = GetPathToFile(filename);
+            string filePath = GetPathToFile(filename);
             AudioClip audioClip;
             
-            if (File.Exists(path))
+            if (IsFileCached(filePath))
             {
-                TaskCompletionSource<AudioClip> taskCompletion = new TaskCompletionSource<AudioClip>();
-                CoroutineDispatcher.Instance.StartCoroutine(LoadAudioFromFile(path, taskCompletion));
+                byte[] bytes = GetCachedFile(filePath);
+                float[] sound = TextToSpeechUtils.ShortsInByteArrayToFloats(bytes);
                 
-                audioClip = await taskCompletion.Task;
+                audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sound.Length, stream: false);
+                audioClip.SetData(sound, 0);
             }
             else
             {
@@ -55,16 +54,13 @@ namespace Innoactive.Hub.TextToSpeech
 
                 if (Configuration.SaveAudioFilesToStreamingAssets)
                 {
-                    // Ensure target directory exists.
-                    string directory = Path.GetDirectoryName(path);
-                    
-                    if (string.IsNullOrEmpty(directory) == false && Directory.Exists(directory) == false)
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
-        
-                    AudioConverter.TryWriteAudioClipToFile(audioClip, path);
+                    CacheAudio(audioClip, filePath);
                 }
+            }
+
+            if (audioClip == null)
+            {
+                throw new CouldNotLoadAudioFileException("AudioClip is null.");
             }
             
             return audioClip;
@@ -76,41 +72,60 @@ namespace Innoactive.Hub.TextToSpeech
             Configuration = configuration;
         }
 
+        /// <summary>
+        /// Returns the relative location were the file is cached.
+        /// </summary>
         protected virtual string GetPathToFile(string filename)
         {
-            string directory = $"{Application.streamingAssetsPath}/{Configuration.StreamingAssetCacheDirectoryName}/{filename}";
+            string directory = $"{Configuration.StreamingAssetCacheDirectoryName}/{filename}";
             return directory;
         }
 
-        private IEnumerator LoadAudioFromFile(string path, TaskCompletionSource<AudioClip> taskCompletion)
+        /// <summary>
+        /// Stores given <paramref name="audioClip"/> in a cached directory.
+        /// </summary>
+        /// <remarks>When used in the Unity Editor the cached directory is inside the StreamingAssets folder; Otherwise during runtime the base path is the platform
+        /// persistent data.</remarks>
+        /// <param name="audioClip">The audio file to be cached.</param>
+        /// <param name="filePath">Relative path where the <paramref name="audioClip"/> will be stored.</param>
+        /// <returns>True if the file was successfully cached.</returns>
+        protected virtual bool CacheAudio(AudioClip audioClip, string filePath)
         {
-            string url = $"file:///{UnityWebRequest.EscapeURL(path)}";
-
-            UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.UNKNOWN);
-
-            yield return request.SendWebRequest();
-
-            if (request.isNetworkError == false && request.isHttpError == false)
+            // Ensure target directory exists.
+            string fileName = Path.GetFileName(filePath);
+            string relativePath = Path.GetDirectoryName(filePath);
+            
+            string basedDirectoryPath = Application.isEditor ? Application.streamingAssetsPath : Application.persistentDataPath;
+            string absolutePath = Path.Combine(basedDirectoryPath, relativePath);
+            
+            if (string.IsNullOrEmpty(absolutePath) == false && Directory.Exists(absolutePath) == false)
             {
-                AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
-                
-                if (clip == null)
-                {
-                    Debug.LogErrorFormat("Could not load AudioClip '{0}' - AudioClip is null.", path);
-                    throw new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!");
-                }
-                else
-                {
-                    taskCompletion.SetResult(clip);
-                }
+                Directory.CreateDirectory(absolutePath);
             }
-            else
-            {
-                Debug.LogErrorFormat("Could not load AudioClip '{0}': {1}", path, request.error);
-                throw new CouldNotLoadAudioFileException("Loading AudioClip from disk failed!");
-            }
+        
+            string absoluteFilePath = Path.Combine(absolutePath, fileName);
+        
+            return AudioConverter.TryWriteAudioClipToFile(audioClip, absoluteFilePath);
         }
 
+        /// <summary>
+        /// Retrieves a cached file.
+        /// </summary>
+        /// <param name="filePath">Relative path where the cached file is stored.</param>
+        /// <returns>A byte array containing the contents of the file.</returns>
+        protected virtual byte[] GetCachedFile(string filePath)
+        {
+            return FileManager.Read(filePath);
+        }
+
+        /// <summary>
+        /// Returns true is a file is cached in given relative <paramref name="filePath"/>.
+        /// </summary>
+        protected virtual bool IsFileCached(string filePath)
+        {
+            return FileManager.Exists(filePath);
+        }
+        
         public class CouldNotLoadAudioFileException : Exception
         {
             public CouldNotLoadAudioFileException(string msg) : base(msg) { }
