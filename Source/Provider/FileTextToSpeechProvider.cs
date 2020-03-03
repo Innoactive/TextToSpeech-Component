@@ -112,7 +112,7 @@ namespace Innoactive.Hub.TextToSpeech
         /// Retrieves a cached file.
         /// </summary>
         /// <param name="filePath">Relative path where the cached file is stored.</param>
-        /// <returns>An asynchronous operation that returns a byte array containing the contents of the file.</returns>
+        /// <returns>A byte array containing the contents of the file.</returns>
         protected virtual byte[] GetCachedFile(string filePath)
         {
             return FileManager.Read(filePath);
