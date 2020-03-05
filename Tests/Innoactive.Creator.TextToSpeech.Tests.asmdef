@@ -1,0 +1,19 @@
+{
+    "name": "Innoactive.Creator.TextToSpeech.Tests",
+    "references": [
+        "GUID:c8561f9de838ac04d8feeda695bc572d",
+        "GUID:880cbf18a8d0b304e905a848d71cf547",
+        "GUID:0acc523941302664db1f4e527237feb3",
+        "GUID:0acc523941302664db1f4e527237feb3",
+        "GUID:42a7f63f1de938c4aacfe96b96e26d88"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,11 +1,9 @@
-﻿#if UNITY_EDITOR
-using System.Linq;
+﻿using System.Linq;
 using System.Collections;
 using Innoactive.Hub.Training;
 using Innoactive.Hub.Training.Audio;
 using Innoactive.Hub.Training.Behaviors;
 using Innoactive.Hub.Training.Utils.Builders;
-using Innoactive.Hub.Unity.Tests.Training.Utils;
 using Innoactive.Creator.Internationalization;
 using UnityEngine.TestTools;
 using UnityEngine.Assertions;
@@ -46,4 +44,3 @@ namespace Innoactive.Hub.Unity.Tests.Training
         }
     }
 }
-#endif
