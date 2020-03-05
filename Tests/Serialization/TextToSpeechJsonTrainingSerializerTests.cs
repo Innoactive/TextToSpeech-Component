@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Collections;
+using Innoactive.Creator.Core.Tests.Utils;
 using Innoactive.Hub.Training;
 using Innoactive.Hub.Training.Audio;
 using Innoactive.Hub.Training.Behaviors;
