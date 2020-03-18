@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Reflection;
+using Innoactive.Creator.Core.Audio;
+using Innoactive.Creator.Core.Internationalization;
 using UnityEngine;
-using Innoactive.Hub.Training.Audio;
-using Innoactive.Creator.Internationalization;
+using Innoactive.Creator.TextToSpeech.Audio;
+using Innoactive.CreatorEditor.UI.Drawers;
 
-namespace Innoactive.Hub.Training.Editors.Drawers
+namespace Innoactive.CreatorEditor.TextToSpeech.UX.Drawers
 {
     /// <inheritdoc />
     [DefaultTrainingDrawer(typeof(IAudioData))]

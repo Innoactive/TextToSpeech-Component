@@ -1,11 +1,12 @@
-﻿using UnityEngine;
-using Innoactive.Hub.Training.Audio;
-using Innoactive.Creator.Internationalization;
-using Innoactive.Hub.Training.Editors.Configuration;
+﻿using Innoactive.Creator.Core.Behaviors;
+using Innoactive.Creator.Core.Internationalization;
+using UnityEngine;
+using Innoactive.Creator.TextToSpeech.Audio;
+using Innoactive.CreatorEditor.UI;
 
-namespace Innoactive.Hub.Training.Behaviors.Editors
+namespace Innoactive.CreatorEditor.TextToSpeech.Behaviors
 {
-    public class TextToSpeechMenuItem : Menu.Item<IBehavior>
+    public class TextToSpeechMenuItem : StepInspectorMenu.Item<IBehavior>
     {
         public override GUIContent DisplayedName
         {

@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace Innoactive.Hub.TextToSpeech
+namespace Innoactive.Creator.TextToSpeech
 {
     /// <summary>
     /// This class adds an entry in Creator's Utilities for showing project's <see cref="TextToSpeechConfiguration"/>.

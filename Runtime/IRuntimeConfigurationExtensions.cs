@@ -1,6 +1,6 @@
-﻿using Innoactive.Hub.Training.Configuration;
+﻿using Innoactive.Creator.Core.Configuration;
 
-namespace Innoactive.Hub.TextToSpeech
+namespace Innoactive.Creator.TextToSpeech
 {
     /// <summary>
     /// TextToSpeech extensions methods for <see cref="IRuntimeConfiguration"/>.
