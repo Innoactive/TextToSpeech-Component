@@ -1,11 +1,8 @@
 using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
+using Innoactive.Creator.Core.Configuration;
 using UnityEngine;
-using Innoactive.Hub.Training.TextToSpeech;
-using Innoactive.Hub.Training.Configuration;
 
-namespace Innoactive.Hub.TextToSpeech
+namespace Innoactive.Creator.TextToSpeech
 {
     public class TextToSpeechConfiguration : ScriptableObject
     {

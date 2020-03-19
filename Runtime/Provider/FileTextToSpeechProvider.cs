@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using Innoactive.Creator.Core.IO;
 using UnityEngine;
-using Innoactive.Creator.IO;
 
-namespace Innoactive.Hub.TextToSpeech
+namespace Innoactive.Creator.TextToSpeech
 {
     /// <summary>
     /// The disk based provider for text to speech, which is using the streaming assets folder.

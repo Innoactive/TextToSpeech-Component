@@ -3,10 +3,9 @@ using System.IO;
 using SpeechLib;
 using UnityEngine;
 using System.Threading.Tasks;
-using Innoactive.Hub.TextToSpeech;
-using Innoactive.Hub.Training.Utils;
+using Innoactive.Creator.Core.Internationalization;
 
-namespace Innoactive.Hub.Training.TextToSpeech
+namespace Innoactive.Creator.TextToSpeech
 {
     /// <summary>
     /// Training TTS provider which uses Microsoft SAPI to generate audio.

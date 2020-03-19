@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Innoactive.Creator.Unity;
 using UnityEngine;
-using Innoactive.Hub.Unity;
-using Innoactive.Hub.Training.TextToSpeech;
+using Innoactive.Creator.TextToSpeech;
 
-namespace Innoactive.Hub.TextToSpeech
+namespace Innoactive.Creator.TextToSpeech
 {
     /// <summary>
     /// This factory creates and provides <see cref="ITextToSpeechProvider"/>s.

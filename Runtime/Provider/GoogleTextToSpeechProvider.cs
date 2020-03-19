@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Networking;
 
-namespace Innoactive.Hub.TextToSpeech
+namespace Innoactive.Creator.TextToSpeech
 {
     /// <summary>
     /// Uses the Google text to speech api
