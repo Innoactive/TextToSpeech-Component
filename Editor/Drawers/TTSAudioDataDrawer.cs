@@ -6,7 +6,7 @@ using UnityEngine;
 using Innoactive.Creator.TextToSpeech.Audio;
 using Innoactive.CreatorEditor.UI.Drawers;
 
-namespace Innoactive.CreatorEditor.TextToSpeech.UX.Drawers
+namespace Innoactive.CreatorEditor.TextToSpeech.UI.Drawers
 {
     /// <inheritdoc />
     [DefaultTrainingDrawer(typeof(IAudioData))]

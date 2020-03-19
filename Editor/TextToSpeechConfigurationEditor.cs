@@ -4,7 +4,7 @@ using UnityEditor;
 using Innoactive.Creator.Core.Utils;
 using Innoactive.Creator.TextToSpeech;
 
-namespace Innoactive.CreatorEditor.TextToSpeech.UX
+namespace Innoactive.CreatorEditor.TextToSpeech.UI
 {
     /// <summary>
     /// This class draws list of <see cref="ITextToSpeechProvider"/> in <see cref="textToSpeechConfiguration"/>.
