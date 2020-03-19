@@ -1,12 +1,13 @@
 using System;
 using UnityEngine;
 using System.Runtime.Serialization;
-using Innoactive.Hub.TextToSpeech;
-using Innoactive.Hub.Training.Attributes;
-using Innoactive.Hub.Training.Configuration;
-using Innoactive.Creator.Internationalization;
+using Innoactive.Creator.Core.Attributes;
+using Innoactive.Creator.Core.Audio;
+using Innoactive.Creator.Core.Configuration;
+using Innoactive.Creator.Core.Internationalization;
+using Innoactive.Creator.TextToSpeech;
 
-namespace Innoactive.Hub.Training.Audio
+namespace Innoactive.Creator.TextToSpeech.Audio
 {
     /// <summary>
     /// This class retrieves and stores AudioClips generated based in a provided localized text. 

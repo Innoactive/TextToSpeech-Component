@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Innoactive.Hub.TextToSpeech
+namespace Innoactive.Creator.TextToSpeech
 {
     /// <summary>
     /// Uses the Watson text to speech api

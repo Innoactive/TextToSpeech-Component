@@ -1,9 +1,12 @@
 ﻿using System;
 using UnityEngine;
-using Innoactive.Hub.Training.Audio;
-using Innoactive.Hub.Training.Behaviors;
+using Innoactive.Creator.Core.Audio;
+using Innoactive.Creator.Core.Behaviors;
+using Innoactive.Creator.TextToSpeech.Audio;
+using Innoactive.CreatorEditor.UI.Drawers;
+using Newtonsoft.Json;
 
-namespace Innoactive.Hub.Training.Editors.Drawers
+namespace Innoactive.CreatorEditor.TextToSpeech.UI.Drawers
 {
     /// <summary>
     /// Default drawer for <see cref="PlayAudioBehavior"/>. It changes displayed name to "Play TTS Audio" or "Play Audio File", depending on which AudioData is used.

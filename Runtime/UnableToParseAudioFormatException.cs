@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Innoactive.Hub.TextToSpeech
+namespace Innoactive.Creator.TextToSpeech
 {
     public class UnableToParseAudioFormatException : Exception
     {
