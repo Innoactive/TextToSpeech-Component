@@ -4,6 +4,7 @@ using Innoactive.Creator.Core.Audio;
 using Innoactive.Creator.Core.Internationalization;
 using UnityEngine;
 using Innoactive.Creator.TextToSpeech.Audio;
+using Innoactive.CreatorEditor.Core.UI.Drawers;
 using Innoactive.CreatorEditor.UI.Drawers;
 
 namespace Innoactive.CreatorEditor.TextToSpeech.UI.Drawers
