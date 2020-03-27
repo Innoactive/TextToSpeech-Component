@@ -1,7 +1,8 @@
 {
     "name": "Innoactive.Creator.TextToSpeech",
     "references": [
-        "GUID:c8561f9de838ac04d8feeda695bc572d"
+        "GUID:c8561f9de838ac04d8feeda695bc572d",
+        "GUID:52aef80bd5e605942a19cc45c7f4745b"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
