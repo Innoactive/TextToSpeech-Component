@@ -1,21 +1,17 @@
 ﻿using Innoactive.Creator.Core.Behaviors;
-using Innoactive.Creator.Core.Internationalization;
-using UnityEngine;
 using Innoactive.Creator.TextToSpeech.Audio;
-using Innoactive.CreatorEditor.UI;
+using Innoactive.Creator.Core.Internationalization;
+using Innoactive.CreatorEditor.UI.StepInspector.Menu;
 
-namespace Innoactive.CreatorEditor.TextToSpeech.Behaviors
+namespace Innoactive.CreatorEditor.TextToSpeech.UI.Behaviors
 {
-    public class TextToSpeechMenuItem : StepInspectorMenu.Item<IBehavior>
+    /// <inheritdoc />
+    public class TextToSpeechMenuItem : MenuItem<IBehavior>
     {
-        public override GUIContent DisplayedName
-        {
-            get
-            {
-                return new GUIContent("Audio/Play TextToSpeech Audio");
-            }
-        }
+        /// <inheritdoc />
+        public override string DisplayedName { get; } = "Audio/Play TextToSpeech Audio";
 
+        /// <inheritdoc />
         public override IBehavior GetNewItem()
         {
             return new PlayAudioBehavior(new TextToSpeechAudio(new LocalizedString()), BehaviorExecutionStages.Activation, true);
