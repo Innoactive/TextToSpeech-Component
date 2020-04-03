@@ -78,7 +78,6 @@ namespace Innoactive.Creator.TextToSpeech
             
             if (configuration.UseStreamingAssetFolder)
             {
-                Debug.Log("Use streaming assets is set true, adding FileTextToSpeechProvider");
                 provider = new FileTextToSpeechProvider(provider, configuration);
             }
             
