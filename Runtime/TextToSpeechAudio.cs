@@ -13,12 +13,11 @@ namespace Innoactive.Creator.TextToSpeech.Audio
     /// This class retrieves and stores AudioClips generated based in a provided localized text. 
     /// </summary>
     [DataContract(IsReference = true)]
+    [DisplayName("Play Text to Speech")]
     public class TextToSpeechAudio : IAudioData
     {
         private bool isLoading;
         private LocalizedString text;
-        
-        public string SourceName { get; } = "TextToSpeech";
 
         [DataMember]
         [UsesSpecificTrainingDrawer("TextToSpeechAudioDataLocalizedStringDrawer")]
