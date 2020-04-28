@@ -18,7 +18,7 @@ namespace Innoactive.Creator.TextToSpeech.Audio
         private bool isLoading;
         private LocalizedString text;
         
-        public string Name { get; } = "TextToSpeech";
+        public string SourceName { get; } = "TextToSpeech";
 
         [DataMember]
         [UsesSpecificTrainingDrawer("TextToSpeechAudioDataLocalizedStringDrawer")]
