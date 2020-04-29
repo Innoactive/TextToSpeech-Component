@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using System.Runtime.Serialization;
-using Innoactive.Creator.Core;
 using Innoactive.Creator.Core.Audio;
 using Innoactive.Creator.Core.Attributes;
 using Innoactive.Creator.Core.Configuration;
