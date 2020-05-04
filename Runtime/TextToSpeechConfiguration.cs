@@ -64,7 +64,7 @@ namespace Innoactive.Creator.TextToSpeech
         /// <remarks>When used in runtime, this method can only retrieve config files located under a Resources folder.</remarks>
         public static TextToSpeechConfiguration LoadConfiguration()
         {
-            TextToSpeechConfiguration configuration = Resources.Load<TextToSpeechConfiguration>(typeof(TextToSpeechConfiguration).Name);
+            TextToSpeechConfiguration configuration = Resources.Load<TextToSpeechConfiguration>(nameof(TextToSpeechConfiguration));
             return configuration != null ? configuration : CreateNewConfiguration();
         }
         
@@ -75,7 +75,7 @@ namespace Innoactive.Creator.TextToSpeech
             
 #if UNITY_EDITOR
             string resourcesPath = "Assets/Resources/";
-            string configFilePath = $"{resourcesPath}{typeof(TextToSpeechConfiguration).Name}.asset";
+            string configFilePath = $"{resourcesPath}{nameof(TextToSpeechConfiguration)}.asset";
             
             if (Directory.Exists(resourcesPath) == false)
             {
