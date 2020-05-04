@@ -20,17 +20,17 @@ namespace Innoactive.CreatorEditor.TextToSpeech.UI
         private void OnEnable()
         {
             textToSpeechConfiguration = (TextToSpeechConfiguration)target;
-            providers = ReflectionUtils.GetConcreteImplementationsOf<ITextToSpeechProvider>().ToList().Select(type => type.Name).ToArray();
-            lastProviderSelectedIndex = providersIndex = string.IsNullOrEmpty(textToSpeechConfiguration.Provider) ? Array.IndexOf(providers, typeof(MicrosoftSapiTextToSpeechProvider).Name) : Array.IndexOf(providers, textToSpeechConfiguration.Provider);
+            providers = ReflectionUtils.GetConcreteImplementationsOf<ITextToSpeechProvider>().ToList().Where(type => type != typeof(FileTextToSpeechProvider)).Select(type => type.Name).ToArray();
+            lastProviderSelectedIndex = providersIndex = string.IsNullOrEmpty(textToSpeechConfiguration.Provider) ? Array.IndexOf(providers, nameof(MicrosoftSapiTextToSpeechProvider)) : Array.IndexOf(providers, textToSpeechConfiguration.Provider);
             textToSpeechConfiguration.Provider = providers[providersIndex];
         }
 
         /// <inheritdoc />
         public override void OnInspectorGUI()
         {
-            providersIndex = EditorGUILayout.Popup("Provider", providersIndex, providers);
             DrawDefaultInspector();
-        
+            providersIndex = EditorGUILayout.Popup("Provider", providersIndex, providers);
+            
             if (providersIndex != lastProviderSelectedIndex)
             {
                 lastProviderSelectedIndex = providersIndex;
