@@ -52,7 +52,7 @@ namespace Innoactive.Creator.TextToSpeech
             {
                 audioClip = await FallbackProvider.ConvertTextToSpeech(text);
 
-                if (Configuration.SaveAudioFilesToStreamingAssets)
+                if (Configuration.UseCache && (Configuration.StillWriteCacheWhenProjectIsBuilt || Application.isEditor))
                 {
                     CacheAudio(audioClip, filePath);
                 }

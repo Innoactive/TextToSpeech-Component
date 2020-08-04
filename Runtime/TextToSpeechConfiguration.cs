@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Innoactive.Creator.Core.Configuration;
 using UnityEngine;
@@ -25,22 +26,29 @@ namespace Innoactive.Creator.TextToSpeech
         public string Voice = "Male";
 
         /// <summary>
-        /// Usage of the standard HTML cache.
-        /// </summary>
-        public bool UseCache = true;
-
-        /// <summary>
         /// Enables the usage of the streaming asset folder as second cache directory to allow deliveries which work offline too.
         /// This means the StreamingAssets/{StreamingAssetCacheDirectoryName} will be searched first and only if there
         /// is no fitting audio file found the text to speech provider will be used to download the audio file from web.
         /// </summary>
+        public bool UseCache = true;
+
+        /// <inheritdoc cref="UseCache"/>
+        [Obsolete("Streaming Assets folder is now always used for caching. Use UseCache instead.")]
+        [HideInInspector]
         public bool UseStreamingAssetFolder = true;
 
         /// <summary>
-        /// With this option enabled the application tries to save the all downloaded audio files to
-        /// StreamingAssets/{StreamingAssetCacheDirectoryName}.
+        /// With this option enabled the application tries to save/cache all downloaded audio files to
+        /// StreamingAssets/{StreamingAssetCacheDirectoryName} during runtime when it is already built.
+        /// Should not be used when building for Android.
         /// </summary>
+        public bool StillWriteCacheWhenProjectIsBuilt = false;
+
+        /// <inheritdoc cref="StillWriteCacheWhenProjectIsBuilt"/>
+        [Obsolete("Use StillWriteCacheWhenProjectIsBuilt instead.")]
+        [HideInInspector]
         public bool SaveAudioFilesToStreamingAssets = false;
+
 
         /// <summary>
         /// StreamingAsset directory name which is used to load/save audio files.

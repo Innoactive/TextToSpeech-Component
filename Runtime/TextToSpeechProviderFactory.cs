@@ -76,7 +76,7 @@ namespace Innoactive.Creator.TextToSpeech
 
             ITextToSpeechProvider provider = registeredProvider[configuration.Provider].Create(configuration);
             
-            if (configuration.UseStreamingAssetFolder)
+            if (configuration.UseCache)
             {
                 provider = new FileTextToSpeechProvider(provider, configuration);
             }
