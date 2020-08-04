@@ -98,11 +98,13 @@ namespace Innoactive.Creator.TextToSpeech
             // If it is invalid, change it to neutral.
             string voice = configuration.Voice;
             
-            switch (voice)
+            switch (voice.ToLower())
             {
                 case "female":
+                    voice = "female";
                     break;
                 case "male":
+                    voice = "male";
                     break;
                 default:
                     voice = "neutral";
