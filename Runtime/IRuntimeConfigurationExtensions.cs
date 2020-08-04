@@ -15,7 +15,7 @@ namespace Innoactive.Creator.TextToSpeech
         /// <summary>
         /// Return loaded <see cref="TextToSpeechConfiguration"/>.
         /// </summary>
-        public static TextToSpeechConfiguration GetTextToSpeechConfiguration(this IRuntimeConfiguration runtimeConfiguration)
+        public static TextToSpeechConfiguration GetTextToSpeechConfiguration(this BaseRuntimeConfiguration runtimeConfiguration)
         {
             if (textToSpeechConfiguration == null)
             {
@@ -28,7 +28,7 @@ namespace Innoactive.Creator.TextToSpeech
         /// <summary>
         /// Loads a new <see cref="TextToSpeechConfiguration"/>
         /// </summary>
-        public static void SetTextToSpeechConfiguration(this IRuntimeConfiguration runtimeConfiguration, TextToSpeechConfiguration ttsConfiguration)
+        public static void SetTextToSpeechConfiguration(this BaseRuntimeConfiguration runtimeConfiguration, TextToSpeechConfiguration ttsConfiguration)
         {
             textToSpeechConfiguration = ttsConfiguration;
         }
