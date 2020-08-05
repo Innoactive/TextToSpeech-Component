@@ -3,7 +3,7 @@
 namespace Innoactive.Creator.TextToSpeech
 {
     /// <summary>
-    /// TextToSpeech extensions methods for <see cref="IRuntimeConfiguration"/>.
+    /// TextToSpeech extensions methods for <see cref="BaseRuntimeConfiguration"/>.
     /// </summary>
     public static class RuntimeConfigurationExtensions
     {
