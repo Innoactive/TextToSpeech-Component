@@ -82,9 +82,9 @@ namespace Innoactive.Creator.TextToSpeech
         {
             this.configuration = configuration;
         }
-
+        
         /// <inheritdoc />
-        public async Task<AudioClip> ConvertTextToSpeech(string text)
+        public Task<AudioClip> ConvertTextToSpeech(string text)
         {
             // Try to get a valid two-letter ISO language code using the provided language in the configuration.
             if (configuration.Language.TryConvertToTwoLetterIsoCode(out string twoLetterIsoCode) == false)
@@ -112,15 +112,15 @@ namespace Innoactive.Creator.TextToSpeech
             }
             
             string filePath = PrepareFilepathForText(text);
-            float[] sampleData = await Synthesize(text, filePath, twoLetterIsoCode, voice);
+            float[] sampleData = Synthesize(text, filePath, twoLetterIsoCode, voice);
 
             AudioClip audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sampleData.Length, stream: false);
             audioClip.SetData(sampleData, 0);
             
-            return audioClip;
+            return Task.FromResult(audioClip);
         }
 
-        private async Task<float[]> Synthesize(string text, string outputPath, string language, string voice)
+        private float[] Synthesize(string text, string outputPath, string language, string voice)
         {
             // Despite the fact that SpVoice.AudioOutputStream accepts values of type ISpeechBaseStream,
             // the single type of a stream that is actually working is a SpFileStream.
