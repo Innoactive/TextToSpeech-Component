@@ -6,7 +6,7 @@ namespace Innoactive.Creator.TextToSpeech
     /// <summary>
     /// TextToSpeech extensions methods for <see cref="IRuntimeConfiguration"/>.
     /// </summary>
-    public static class IRuntimeConfigurationExtensions
+    public static class RuntimeConfigurationExtensions
     {
         /// <summary>
         /// Text to speech configuration.
