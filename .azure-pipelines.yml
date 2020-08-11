@@ -25,7 +25,10 @@ pr:
     include:
       - develop
 
-pool: Unity
+pool:
+  name: Windows 10
+  demands:
+    - u3d
 
 variables:
     - group: basic-unity
@@ -37,6 +40,7 @@ stages:
       - job: CommitMessageCheck
         displayName: Commit Message Check
         steps:
+          - task: UseNode@1
           - script: npm install @commitlint/cli commitlint-azure-pipelines-cli @commitlint/config-conventional
           - script: >
               npx
