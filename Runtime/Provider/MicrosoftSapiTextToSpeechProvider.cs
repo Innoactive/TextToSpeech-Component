@@ -86,6 +86,7 @@ namespace Innoactive.Creator.TextToSpeech
         /// <inheritdoc />
         public Task<AudioClip> ConvertTextToSpeech(string text)
         {
+#if UNITY_STANDALONE_WIN
             // Try to get a valid two-letter ISO language code using the provided language in the configuration.
             if (configuration.Language.TryConvertToTwoLetterIsoCode(out string twoLetterIsoCode) == false)
             {
@@ -118,6 +119,9 @@ namespace Innoactive.Creator.TextToSpeech
             audioClip.SetData(sampleData, 0);
             
             return Task.FromResult(audioClip);
+#else
+            throw new PlatformNotSupportedException($"TTS audio '{text}' could not be generated due that {GetType().Name} is not supported in {Application.platform}");
+#endif
         }
 
         private float[] Synthesize(string text, string outputPath, string language, string voice)
