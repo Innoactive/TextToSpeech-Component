@@ -86,7 +86,7 @@ namespace Innoactive.Creator.TextToSpeech
         /// <inheritdoc />
         public Task<AudioClip> ConvertTextToSpeech(string text)
         {
-#if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
             // Try to get a valid two-letter ISO language code using the provided language in the configuration.
             if (configuration.Language.TryConvertToTwoLetterIsoCode(out string twoLetterIsoCode) == false)
             {
