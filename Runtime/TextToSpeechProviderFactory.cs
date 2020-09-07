@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Innoactive.Creator.Unity;
-using UnityEngine;
 
 namespace Innoactive.Creator.TextToSpeech
 {
@@ -66,12 +65,12 @@ namespace Innoactive.Creator.TextToSpeech
         {
             if (string.IsNullOrEmpty(configuration.Provider))
             {
-                throw new NoConfigurationFoundException(string.Format("There is not a valid provider set in '{0}'!", configuration.GetType().Name));
+                throw new NoConfigurationFoundException($"There is not a valid provider set in '{configuration.GetType().Name}'!");
             }
 
             if (!registeredProvider.ContainsKey(configuration.Provider))
             {
-                throw new NoMatchingProviderFoundException(string.Format("No matching provider with name '{0}' found!", configuration.Provider));
+                throw new NoMatchingProviderFoundException($"No matching provider with name '{configuration.Provider}' found!");
             }
 
             ITextToSpeechProvider provider = registeredProvider[configuration.Provider].Create(configuration);
