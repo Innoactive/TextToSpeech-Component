@@ -5,6 +5,7 @@ using Innoactive.Creator.Core.Audio;
 using Innoactive.Creator.Core.Attributes;
 using Innoactive.Creator.Core.Configuration;
 using Innoactive.Creator.Core.Internationalization;
+using Innoactive.Creator.Core.Runtime.Properties;
 
 namespace Innoactive.Creator.TextToSpeech.Audio
 {
@@ -92,6 +93,11 @@ namespace Innoactive.Creator.TextToSpeech.Audio
             }
             
             isLoading = false;
+        }
+
+        public bool IsEmpty()
+        {
+            return Text == null || string.IsNullOrEmpty(Text.Value);
         }
     }
 }
