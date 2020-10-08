@@ -97,7 +97,7 @@ namespace Innoactive.Creator.TextToSpeech.Audio
 
         public bool IsEmpty()
         {
-            return Text == null || string.IsNullOrEmpty(Text.Value);
+            return Text == null || (string.IsNullOrEmpty(Text.Key) && string.IsNullOrEmpty(Text.DefaultText));
         }
     }
 }
