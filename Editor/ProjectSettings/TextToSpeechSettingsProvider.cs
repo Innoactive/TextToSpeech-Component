@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class TextToSpeechSettingsProvider : SettingsProvider
+internal class TextToSpeechSettingsProvider : SettingsProvider
 {
     const string Path = "Project/Creator/Text to Speech";
 
