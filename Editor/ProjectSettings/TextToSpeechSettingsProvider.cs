@@ -3,18 +3,12 @@ using Innoactive.CreatorEditor.TextToSpeech.UI;
 using Innoactive.CreatorEditor.UI;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 internal class TextToSpeechSettingsProvider : SettingsProvider
 {
     const string Path = "Project/Creator/Text to Speech";
 
     public TextToSpeechSettingsProvider() : base(Path, SettingsScope.Project) {}
-
-    public static bool IsSettingsAvailable()
-    {
-        return true;
-    }
 
     public override void OnGUI(string searchContext)
     {
@@ -37,12 +31,7 @@ internal class TextToSpeechSettingsProvider : SettingsProvider
     [SettingsProvider]
     public static SettingsProvider Provider()
     {
-        if (IsSettingsAvailable())
-        {
-            SettingsProvider provider = new TextToSpeechSettingsProvider();
-            return provider;
-        }
-
-        return null;
+        SettingsProvider provider = new TextToSpeechSettingsProvider();
+        return provider;
     }
 }
