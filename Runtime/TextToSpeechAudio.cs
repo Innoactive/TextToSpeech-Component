@@ -93,5 +93,11 @@ namespace Innoactive.Creator.TextToSpeech.Audio
             
             isLoading = false;
         }
+
+        /// <inheritdoc/>
+        public bool IsEmpty()
+        {
+            return Text == null || (string.IsNullOrEmpty(Text.Key) && string.IsNullOrEmpty(Text.DefaultText));
+        }
     }
 }

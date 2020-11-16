@@ -1,10 +1,11 @@
 using System.IO;
 using Innoactive.Creator.Core.Configuration;
+using Innoactive.Creator.Core.Runtime.Utils;
 using UnityEngine;
 
 namespace Innoactive.Creator.TextToSpeech
 {
-    public class TextToSpeechConfiguration : ScriptableObject
+    public class TextToSpeechConfiguration : SettingsObject<TextToSpeechConfiguration>
     {
         /// <summary>
         /// Name of the <see cref="ITextToSpeechProvider"/>.
