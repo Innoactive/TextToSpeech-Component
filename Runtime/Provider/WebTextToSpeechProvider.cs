@@ -17,6 +17,17 @@ namespace Innoactive.Creator.TextToSpeech
         protected readonly UnityWebRequest UnityWebRequest;
 
         protected readonly IAudioConverter AudioConverter;
+        
+        private AudioType audioType = AudioType.MPEG;
+
+        /// <summary>
+        /// The type of audio encoding for the downloaded audio clip.
+        /// </summary>
+        protected AudioType AudioType
+        {
+            get => audioType;
+            set => audioType = value;
+        }
 
         protected WebTextToSpeechProvider() : this(new UnityWebRequest()) { }
 
@@ -43,7 +54,6 @@ namespace Innoactive.Creator.TextToSpeech
 
             return await taskCompletion.Task;
         }
-
         #endregion
 
         #region Download handling
@@ -64,18 +74,19 @@ namespace Innoactive.Creator.TextToSpeech
             {
                 // Request and wait for the response.
                 yield return request.SendWebRequest();
-
+            
                 if (request.isNetworkError == false && request.isHttpError == false)
                 {
                     byte[] data = request.downloadHandler.data;
-
+            
                     if (data == null || data.Length == 0)
                     {
                         throw new DownloadFailedException($"Error while retrieving audio: '{request.error}'");
                     }
                     else
                     {
-                        ParseAudio(data, task);
+                        AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+                        task.SetResult(clip);
                     }
                 }
                 else
@@ -94,31 +105,18 @@ namespace Innoactive.Creator.TextToSpeech
             string escapedText = UnityWebRequest.EscapeURL(text);
             Uri uri = new Uri(string.Format(url, escapedText));
             
-            return UnityWebRequest.Get(uri);
+            return UnityWebRequestMultimedia.GetAudioClip(uri, audioType);
         }
 
         /// <summary>
         /// This method converts an mp3 file from byte to an AudioClip. If you have a different format, override this method.
         /// </summary>
+        /// <remarks>The base implementation only works on Windows.</remarks>
         protected virtual AudioClip CreateAudioClip(byte[] data)
         {
             return AudioConverter.CreateAudioClipFromMp3(data);
         }
         #endregion
-
-        private void ParseAudio(byte[] data, TaskCompletionSource<AudioClip> task)
-        {
-            AudioClip clip = CreateAudioClip(data);
-            
-            if (clip.loadState == AudioDataLoadState.Loaded)
-            {
-                task.SetResult(clip);
-            }
-            else
-            {
-                throw new UnableToParseAudioFormatException("Creating AudioClip failed for text");
-            }
-        }
 
         public class DownloadFailedException : Exception
         {
