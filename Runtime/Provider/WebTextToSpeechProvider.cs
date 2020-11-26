@@ -23,6 +23,7 @@ namespace Innoactive.Creator.TextToSpeech
         /// <summary>
         /// The type of audio encoding for the downloaded audio clip.
         /// </summary>
+        /// <remarks>Relevant for the Android platform.</remarks>
         protected AudioType AudioType
         {
             get => audioType;
@@ -85,8 +86,12 @@ namespace Innoactive.Creator.TextToSpeech
                     }
                     else
                     {
+#if UNITY_ANDROID
                         AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
                         task.SetResult(clip);
+#else
+                        ParseAudio(data, task);
+#endif
                     }
                 }
                 else
@@ -105,7 +110,11 @@ namespace Innoactive.Creator.TextToSpeech
             string escapedText = UnityWebRequest.EscapeURL(text);
             Uri uri = new Uri(string.Format(url, escapedText));
             
+#if UNITY_ANDROID
             return UnityWebRequestMultimedia.GetAudioClip(uri, audioType);
+#else
+            return UnityWebRequest.Get(uri);
+#endif
         }
 
         /// <summary>
@@ -117,6 +126,20 @@ namespace Innoactive.Creator.TextToSpeech
             return AudioConverter.CreateAudioClipFromMp3(data);
         }
         #endregion
+        
+        private void ParseAudio(byte[] data, TaskCompletionSource<AudioClip> task)
+        {
+            AudioClip clip = CreateAudioClip(data);
+
+            if (clip.loadState == AudioDataLoadState.Loaded)
+            {
+                task.SetResult(clip);
+            }
+            else
+            {
+                throw new UnableToParseAudioFormatException("Creating AudioClip failed for text");
+            }
+        }
 
         public class DownloadFailedException : Exception
         {
