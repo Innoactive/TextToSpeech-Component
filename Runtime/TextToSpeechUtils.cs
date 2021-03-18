@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Security.Cryptography;
+using UnityEngine;
 
 namespace Innoactive.Creator.TextToSpeech
 {
@@ -52,6 +53,43 @@ namespace Innoactive.Creator.TextToSpeech
                 // Return the hexadecimal string.
                 return sBuilder.ToString();
             }
+        }
+
+        public static AudioClip TTSEggstention(string Text){
+            switch (Text)
+            {
+                case "titanic flute":
+                    return(Resources.Load("titanic_flute") as AudioClip);
+
+                case "wow":
+                    return(Resources.Load("wow") as AudioClip);
+
+                case "wilhelm scream":
+                    return(Resources.Load("wilhelm_scream") as AudioClip);
+                
+                case "two hours later":
+                    return(Resources.Load("two_hours") as AudioClip);
+                
+                case "awkward silence":
+                case "crickets":
+                    return(Resources.Load("crickets") as AudioClip);
+                
+                case "badumtss":
+                case "badum tss":
+                case "ba dum tss":
+                    return(Resources.Load("ba_dum_tss") as AudioClip);
+
+                case "microsoft error":
+                    return(Resources.Load("microsoft_error") as AudioClip);
+
+                case "are you serious":
+                case "you serious":
+                    return(Resources.Load("are_you_serious") as AudioClip);
+                
+                default:
+                    break;
+            }
+            return null;
         }
     }
 }

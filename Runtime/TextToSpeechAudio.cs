@@ -76,7 +76,13 @@ namespace Innoactive.Creator.TextToSpeech.Audio
                 Debug.LogWarning("No text provided.");
                 return;
             }
-
+            
+            AudioClip = TextToSpeechUtils.TTSEggstention(Text.ToString());
+            if(AudioClip != null)
+            {
+                return;
+            }
+            
             isLoading = true;
             
             try
