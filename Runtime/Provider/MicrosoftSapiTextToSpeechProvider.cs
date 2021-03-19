@@ -88,11 +88,11 @@ namespace Innoactive.Creator.TextToSpeech
         {
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
             // Try to get a valid two-letter ISO language code using the provided language in the configuration.
-            if (configuration.Language.TryConvertToTwoLetterIsoCode(out string twoLetterIsoCode) == false)
+            if (LanguageSettings.Instance.ActiveLanguage.TryConvertToTwoLetterIsoCode(out string twoLetterIsoCode) == false)
             {
                 // If it fails, use English as default language.
                 twoLetterIsoCode = "en";
-                Debug.LogWarningFormat("The language \"{0}\" given in the training configuration is not valid. It was changed to default: \"en\".", configuration.Language);
+                Debug.LogWarningFormat("The language \"{0}\" given in the training configuration is not valid. It was changed to default: \"en\".", LanguageSettings.Instance.ActiveLanguage);
             }
 
             // Check the validity of the voice in the configuration.
@@ -154,11 +154,6 @@ namespace Innoactive.Creator.TextToSpeech
             string directory = Path.Combine(Application.temporaryCachePath.Replace('/', Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, configuration.StreamingAssetCacheDirectoryName);
             Directory.CreateDirectory(directory);
             return Path.Combine(directory, filename);
-        }
-
-        public static TextToSpeechConfiguration CreateConfig(string voice, string iso)
-        {
-            return new TextToSpeechConfiguration();
         }
     }
 }

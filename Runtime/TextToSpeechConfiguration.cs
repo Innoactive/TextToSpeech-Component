@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Innoactive.Creator.Core.Configuration;
 using Innoactive.Creator.Core.Runtime.Utils;
@@ -17,6 +18,8 @@ namespace Innoactive.Creator.TextToSpeech
         /// Language which should be used.
         /// </summary>
         /// <remarks>It depends on the chosen provider.</remarks>
+        [HideInInspector]
+        [Obsolete("Please use active language from the LanguageSettings.")]
         public string Language = "En";
 
         /// <summary>
@@ -24,11 +27,6 @@ namespace Innoactive.Creator.TextToSpeech
         /// </summary>
         /// <remarks>It depends on the chosen provider.</remarks>
         public string Voice = "Male";
-
-        /// <summary>
-        /// Usage of the standard HTML cache.
-        /// </summary>
-        public bool UseCache = true;
 
         /// <summary>
         /// Enables the usage of the streaming asset folder as second cache directory to allow deliveries which work offline too.

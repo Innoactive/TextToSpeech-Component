@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Security.Cryptography;
+using Innoactive.Creator.Core.Internationalization;
 
 namespace Innoactive.Creator.TextToSpeech
 {
@@ -11,7 +12,7 @@ namespace Innoactive.Creator.TextToSpeech
         public static string GetUniqueTextToSpeechFilename(this TextToSpeechConfiguration configuration, string text, string format = "wav")
         {
             string hash = string.Format("{0}_{1}", configuration.Voice, text);
-            return string.Format(@"TTS_{0}_{1}_{2}.{3}", configuration.Provider, configuration.Language, GetMd5Hash(hash).Replace("-", ""), format);
+            return string.Format(@"TTS_{0}_{1}_{2}.{3}", configuration.Provider, LanguageSettings.Instance.ActiveLanguage, GetMd5Hash(hash).Replace("-", ""), format);
         }
         
         /// <summary>
