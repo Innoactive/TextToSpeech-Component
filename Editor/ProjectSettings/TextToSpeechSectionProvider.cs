@@ -6,11 +6,21 @@ using UnityEngine;
 
 namespace Innoactive.CreatorEditor.TextToSpeech.UI.ProjectSettings
 {
+    /// <summary>
+    /// Provides text to speech settings.
+    /// </summary>
     public class TextToSpeechSectionProvider : IProjectSettingsSection
     {
+        /// <inheritdoc/>
         public string Title { get; } = "Text to Speech";
+        
+        /// <inheritdoc/>
         public Type TargetPageProvider { get; } = typeof(LanguageSettingsProvider);
+        
+        /// <inheritdoc/>
         public int Priority { get; } = 0;
+        
+        /// <inheritdoc/>
         public void OnGUI(string searchContext)
         {
             GUILayout.Label("Configuration for your Text to Speech provider.", CreatorEditorStyles.ApplyPadding(CreatorEditorStyles.Label, 0));
