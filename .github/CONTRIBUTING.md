@@ -68,9 +68,9 @@ See more about [Pull Requests](https://help.github.com/en/github/collaborating-w
 
 Meet our maintainer:
 
-[<img alt="SimonTheSourcerer" src="https://github.com/SimonTheSourcerer.png" width="110">](https://github.com/SimonTheSourcerer) |
-:---: | :---: |
-[Simon L](mailto:simon.lerch@innoactive.de) |
+|[<img alt="SimonTheSourcerer" src="https://github.com/SimonTheSourcerer.png" width="110">](https://github.com/SimonTheSourcerer)|
+|:---:|
+|[Simon L](mailto:simon.lerch@innoactive.de)|
 
 Maintainers are responsible for this repository and its community.
 
