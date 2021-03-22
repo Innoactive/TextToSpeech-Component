@@ -66,13 +66,16 @@ See more about [Pull Requests](https://help.github.com/en/github/collaborating-w
 
 ## Maintainers
 
-Meet out maintainers:
+Meet our maintainer:
 
-[<img alt="SimonTheSourcerer" src="https://github.com/SimonTheSourcerer.png" width="110">](https://github.com/SimonTheSourcerer) | [<img alt="aleksei-korolev" src="https://github.com/aleksei-korolev.png" width="110">](https://github.com/aleksei-korolev) 
-:---: | :---: |
-[Simon L](mailto:simon.lerch@innoactive.de) | [Aleksei Korolev](mailto:aleksei.korolev@innoactive.de)
+|[<img alt="SimonTheSourcerer" src="https://github.com/SimonTheSourcerer.png" width="110">](https://github.com/SimonTheSourcerer)|
+|:---:|
+|[Simon L](mailto:simon.lerch@innoactive.de)|
 
 Maintainers are responsible for this repository and its community.
+
+### Former Maintainers
+[Aleksei Korolev](https://github.com/aleksei-korolev)
 
 ## Coding Conventions
 
