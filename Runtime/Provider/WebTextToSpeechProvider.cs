@@ -76,7 +76,7 @@ namespace Innoactive.Creator.TextToSpeech
                 // Request and wait for the response.
                 yield return request.SendWebRequest();
             
-                if (request.isNetworkError == false && request.isHttpError == false)
+                if (request.result == UnityWebRequest.Result.Success)
                 {
                     byte[] data = request.downloadHandler.data;
             
@@ -84,19 +84,17 @@ namespace Innoactive.Creator.TextToSpeech
                     {
                         throw new DownloadFailedException($"Error while retrieving audio: '{request.error}'");
                     }
-                    else
-                    {
+                    
 #if UNITY_ANDROID
-                        AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
-                        task.SetResult(clip);
+                    AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+                    task.SetResult(clip);
 #else
-                        ParseAudio(data, task);
+                    ParseAudio(data, task);
 #endif
-                    }
                 }
                 else
                 {
-                    throw new DownloadFailedException($"Error while fetching audio from '{request.uri}' backend, error: '{request.error}'");
+                    throw new DownloadFailedException($"Error while fetching audio from '{request.uri}' backend, error: '\n{request.result}: {request.error}'");
                 }
             }
         }
