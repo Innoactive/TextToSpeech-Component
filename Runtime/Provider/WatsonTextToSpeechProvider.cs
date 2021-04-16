@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Innoactive.Creator.Core.Internationalization;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Innoactive.Creator.TextToSpeech
@@ -24,7 +25,7 @@ namespace Innoactive.Creator.TextToSpeech
 
         protected override string GetAudioFileDownloadUrl(string text)
         {
-            return string.Format(URL, text, Configuration.Language, Configuration.Voice);
+            return string.Format(URL, text, LanguageSettings.Instance.ActiveOrDefaultLanguage, Configuration.Voice);
         }
     }
 }
