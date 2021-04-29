@@ -71,9 +71,15 @@ namespace Innoactive.Creator.TextToSpeech.Audio
                 return;
             }
 
-            if (Text == null || string.IsNullOrEmpty(Text.Value))
+            if (Text == null)
             {
-                Debug.LogWarning("No text provided.");
+                Debug.LogWarning("No text provided");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(Text.Value))
+            {
+                Debug.LogWarning($"No text provided for key '{Text.Key}'");
                 return;
             }
 
