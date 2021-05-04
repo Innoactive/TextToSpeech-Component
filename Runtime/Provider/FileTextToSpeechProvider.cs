@@ -127,6 +127,8 @@ namespace Innoactive.Creator.TextToSpeech
             return FileManager.Exists(filePath);
         }
         
+        // Found at https://answers.unity.com/questions/737002/wav-byte-to-audioclip.html
+        // static int bytesToInt(byte[] bytes,int offset=0)
         private int CalculateRawFileFrequency(byte[] bytes, int offset=0)
         {
             int value=0;
