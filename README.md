@@ -1,6 +1,6 @@
 # Text-to-Speech Component
 
-This component contains the TTS audio behavior which would generate a voice line on the fly. It connects with the Windows TTS engine, or with any other that support web requests.
+This [Innoactive Creator](https://github.com/Innoactive/Creator) component contains the TTS audio behavior which would generate a voice line on the fly. It connects with the Windows TTS engine, or with any other that support web requests.
 
 For more information visit: [Creator Core](https://github.com/Innoactive/Creator)
 
