@@ -43,9 +43,10 @@ namespace Innoactive.Creator.TextToSpeech
             if (IsFileCached(filePath))
             {
                 byte[] bytes = GetCachedFile(filePath);
+                int bitrate = CalculateRawFileFrequency(bytes, 24);
                 float[] sound = TextToSpeechUtils.ShortsInByteArrayToFloats(bytes);
-                
-                audioClip = AudioClip.Create(text, channels: 1, frequency: 48000, lengthSamples: sound.Length, stream: false);
+
+                audioClip = AudioClip.Create(text, channels: 1, frequency: bitrate, lengthSamples: sound.Length, stream: false);
                 audioClip.SetData(sound, 0);
             }
             else
@@ -124,6 +125,19 @@ namespace Innoactive.Creator.TextToSpeech
         protected virtual bool IsFileCached(string filePath)
         {
             return FileManager.Exists(filePath);
+        }
+        
+        // Found at https://answers.unity.com/questions/737002/wav-byte-to-audioclip.html
+        private int CalculateRawFileFrequency(byte[] bytes, int offset=0)
+        {
+            int value = 0;
+            
+            for (int i = 0; i < 4; ++i)
+            {
+                value |= bytes[offset + i] << (i * 8);
+            }
+            
+            return value;
         }
         
         public class CouldNotLoadAudioFileException : Exception
