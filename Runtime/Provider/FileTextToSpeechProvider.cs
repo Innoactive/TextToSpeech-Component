@@ -128,14 +128,13 @@ namespace Innoactive.Creator.TextToSpeech
         }
         
         // Found at https://answers.unity.com/questions/737002/wav-byte-to-audioclip.html
-        // static int bytesToInt(byte[] bytes,int offset=0)
         private int CalculateRawFileFrequency(byte[] bytes, int offset=0)
         {
-            int value=0;
+            int value = 0;
             
-            for (int i=0; i<4; i++)
+            for (int i = 0; i < 4; ++i)
             {
-                value |= bytes[offset+i] << (i*8);
+                value |= bytes[offset + i] << (i * 8);
             }
             
             return value;
