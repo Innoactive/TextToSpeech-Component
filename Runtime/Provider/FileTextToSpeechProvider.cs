@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Innoactive.Creator.Core.IO;
 using UnityEngine;
-using UnityEngine.VFX;
 
 namespace Innoactive.Creator.TextToSpeech
 {
