@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Innoactive.Creator.Core.IO;
 using UnityEngine;
@@ -44,7 +45,8 @@ namespace Innoactive.Creator.TextToSpeech
             {
                 byte[] bytes = GetCachedFile(filePath);
                 int bitrate = CalculateRawFileFrequency(bytes, 24);
-                float[] sound = TextToSpeechUtils.ShortsInByteArrayToFloats(bytes);
+                // Skipping the first offset * 2 bits to fix sound issues.
+                float[] sound = TextToSpeechUtils.ShortsInByteArrayToFloats(bytes.Skip(24 * 2).ToArray());
 
                 audioClip = AudioClip.Create(text, channels: 1, frequency: bitrate, lengthSamples: sound.Length, stream: false);
                 audioClip.SetData(sound, 0);
